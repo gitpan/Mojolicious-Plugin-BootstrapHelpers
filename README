@@ -30,7 +30,7 @@ DESCRIPTION
     Bootstrap documentation <http://getbootstrap.com/components/#panels>
 
    No body, no title
-        %= bs_panel
+        %= panel
 
         <div class="panel panel-default">
             <div class="panel-body">
@@ -38,7 +38,7 @@ DESCRIPTION
         </div>
 
    Body, no title
-        %= bs_panel undef ,=> begin
+        %= panel undef ,=> begin
             <p>A short text.</p>
         %  end
 
@@ -49,7 +49,7 @@ DESCRIPTION
         </div>
 
    Body and title
-        %= bs_panel 'The header' => begin
+        %= panel 'The header' => begin
             <p>A short text.</p>
         %  end
 
@@ -63,7 +63,7 @@ DESCRIPTION
         </div>
 
    Body and title, with context
-        %= bs_panel 'Panel 5', success => 1 => begin
+        %= panel 'Panel 5', success => 1 => begin
             <p>A short text.</p>
         %  end
     
@@ -80,7 +80,7 @@ DESCRIPTION
     Bootstrap documentation <http://getbootstrap.com/css/#forms>
 
    Basic form group
-        %= bs_formgroup 'Text test 1', text_field => ['test_text']
+        %= formgroup 'Text test 1', text_field => ['test_text']
 
         <div class="form-group">
             <label class="control-label" for="test_text">Text test 1</label>
@@ -90,7 +90,7 @@ DESCRIPTION
     The first item in the array ref is used for both "id" and "name".
 
    Input group (before), and large input field
-        %= bs_formgroup 'Text test 4', text_field => ['test_text', append => '.00', large => 1]
+        %= formgroup 'Text test 4', text_field => ['test_text', append => '.00', large => 1]
 
         <div class="form-group">
             <label class="control-label" for="test_text">Text test 4</label>
@@ -101,7 +101,7 @@ DESCRIPTION
         </div>
 
    Input group (before and after), and with value
-        %= bs_formgroup 'Text test 5', text_field => ['test_text', '200', prepend => '$', append => '.00']
+        %= formgroup 'Text test 5', text_field => ['test_text', '200', prepend => '$', append => '.00']
 
         <div class="form-group">
             <label class="control-label" for="test_text">Text test 5</label>
@@ -116,7 +116,7 @@ DESCRIPTION
     should populate the input tag.
 
    Large input group
-        %= bs_formgroup 'Text test 6', text_field => ['test_text'], large => 1
+        %= formgroup 'Text test 6', text_field => ['test_text'], large => 1
 
         <div class="form-group form-group-lg">
             <label class="control-label" for="test_text">Text test 6</label>
@@ -128,7 +128,7 @@ DESCRIPTION
     group.
 
    Horizontal form groups
-        %= bs_formgroup 'Text test 8', text_field => ['test_text'], cols => { medium => [2, 10], small => [4, 8] }
+        %= formgroup 'Text test 8', text_field => ['test_text'], cols => { medium => [2, 10], small => [4, 8] }
 
         <div class="form-group">
             <label class="control-label col-md-2 col-sm-4" for="test_text">Text test 8</label>

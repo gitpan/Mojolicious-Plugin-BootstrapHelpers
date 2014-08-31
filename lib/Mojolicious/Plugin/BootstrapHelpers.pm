@@ -1,7 +1,9 @@
 package Mojolicious::Plugin::BootstrapHelpers {
+    use strict;
+    use true;
+    
     use Mojo::Base 'Mojolicious::Plugin';
-    use Syntax::Collection::Basic;
-
+    
     use List::AllUtils 'first_index';
     use Mojo::ByteStream;
     use Mojo::Util 'xml_escape';
@@ -10,19 +12,7 @@ package Mojolicious::Plugin::BootstrapHelpers {
 
     use experimental 'postderef';
 
-    our $VERSION = 0.002;
-
-    sub register {
-        my $self = shift;
-        my $app = shift;
-
-        $app->helper(bs_panel => \&bootstrap_panel);
-        $app->helper(bs_formgroup => \&bootstrap_formgroup);
-        $app->helper(bs_button => \&bootstrap_button);
-        $app->helper(bs_submit => \&bootstrap_submit);
-
-
-    }
+    our $VERSION = 0.003;
 
     sub bootstrap_panel {
         my($c, $title, $callback, $content, $attr) = parse_call(@_);
@@ -264,6 +254,46 @@ package Mojolicious::Plugin::BootstrapHelpers {
         $tag =~ s{[ \s]+$}{}g;
         return Mojo::ByteStream->new($tag);
     }
+
+    sub register {
+        my $self = shift;
+        my $app = shift;
+        my $args = shift;
+
+        my $px = setup_prefix($args->{'global_prefix'});
+        my $spx = setup_prefix($args->{'shortcut_prefix'});
+        my $suppress_shortcuts = $args->{'suppress_shortcuts'} //= 0;
+
+        add_helper($app, $px, panel => \&bootstrap_panel);
+        add_helper($app, $px, formgroup => \&bootstrap_formgroup);
+        add_helper($app, $px, button => \&bootstrap_button);
+        add_helper($app, $px, submit_button => \&bootstrap_submit);
+
+        if(!$suppress_shortcuts) {
+            add_helper($app, $spx, large => sub { (large => 1) });
+            add_helper($app, $spx, success => sub { (success => 1) });
+        }
+
+    }
+
+    sub setup_prefix {
+        my $prefix = shift;
+
+        return defined $prefix && !length $prefix   ?   '_'
+             : defined $prefix && $prefix eq '_'    ?   '_'
+             : defined $prefix                      ?   $prefix.'_'
+             :                                          ''
+             ;
+    }
+
+    sub add_helper {
+        my $app = shift;
+        my $prefix = shift;
+        my $helper = shift;
+        my $method = shift;
+
+        $app->helper($prefix.$helper => $method);
+    }
 }
 __END__
 
@@ -303,7 +333,7 @@ L<Bootstrap documentation|http://getbootstrap.com/components/#panels>
 
 =head3 No body, no title
 
-    %= bs_panel
+    %= panel
 
     <div class="panel panel-default">
         <div class="panel-body">
@@ -312,7 +342,7 @@ L<Bootstrap documentation|http://getbootstrap.com/components/#panels>
 
 =head3 Body, no title
 
-    %= bs_panel undef ,=> begin
+    %= panel undef ,=> begin
         <p>A short text.</p>
     %  end
 
@@ -324,7 +354,7 @@ L<Bootstrap documentation|http://getbootstrap.com/components/#panels>
 
 =head3 Body and title
 
-    %= bs_panel 'The header' => begin
+    %= panel 'The header' => begin
         <p>A short text.</p>
     %  end
 
@@ -339,7 +369,7 @@ L<Bootstrap documentation|http://getbootstrap.com/components/#panels>
 
 =head3 Body and title, with context
     
-    %= bs_panel 'Panel 5', success => 1 => begin
+    %= panel 'Panel 5', success => 1 => begin
         <p>A short text.</p>
     %  end
     
@@ -358,7 +388,7 @@ L<Bootstrap documentation|http://getbootstrap.com/css/#forms>
 
 =head3 Basic form group
     
-    %= bs_formgroup 'Text test 1', text_field => ['test_text']
+    %= formgroup 'Text test 1', text_field => ['test_text']
 
     <div class="form-group">
         <label class="control-label" for="test_text">Text test 1</label>
@@ -369,7 +399,7 @@ The first item in the array ref is used for both C<id> and C<name>.
 
 =head3 Input group (before), and large input field
 
-    %= bs_formgroup 'Text test 4', text_field => ['test_text', append => '.00', large => 1]
+    %= formgroup 'Text test 4', text_field => ['test_text', append => '.00', large => 1]
 
     <div class="form-group">
         <label class="control-label" for="test_text">Text test 4</label>
@@ -381,7 +411,7 @@ The first item in the array ref is used for both C<id> and C<name>.
 
 =head3 Input group (before and after), and with value
 
-    %= bs_formgroup 'Text test 5', text_field => ['test_text', '200', prepend => '$', append => '.00']
+    %= formgroup 'Text test 5', text_field => ['test_text', '200', prepend => '$', append => '.00']
 
     <div class="form-group">
         <label class="control-label" for="test_text">Text test 5</label>
@@ -396,7 +426,7 @@ The (optional) second item in the array ref is the value, if any, that should po
 
 =head3 Large input group
 
-    %= bs_formgroup 'Text test 6', text_field => ['test_text'], large => 1
+    %= formgroup 'Text test 6', text_field => ['test_text'], large => 1
 
     <div class="form-group form-group-lg">
         <label class="control-label" for="test_text">Text test 6</label>
@@ -407,7 +437,7 @@ Note the difference with the earlier example. Here C<large =E<gt> 1> is outside 
 
 =head3 Horizontal form groups
     
-    %= bs_formgroup 'Text test 8', text_field => ['test_text'], cols => { medium => [2, 10], small => [4, 8] }
+    %= formgroup 'Text test 8', text_field => ['test_text'], cols => { medium => [2, 10], small => [4, 8] }
 
     <div class="form-group">
         <label class="control-label col-md-2 col-sm-4" for="test_text">Text test 8</label>

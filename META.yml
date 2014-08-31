@@ -33,4 +33,4 @@ resources:
   bugtracker: https://github.com/Csson/p5-mojolicious-plugin-bootstraphelpers/issues
   homepage: https://github.com/Csson/p5-mojolicious-plugin-bootstraphelpers
   repository: https://github.com/Csson/p5-mojolicious-plugin-bootstraphelpers.git
-version: '0.002'
+version: '0.003'
