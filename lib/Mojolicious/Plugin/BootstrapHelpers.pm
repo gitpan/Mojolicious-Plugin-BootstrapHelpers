@@ -12,13 +12,32 @@ package Mojolicious::Plugin::BootstrapHelpers {
 
     use experimental 'postderef';
 
-    our $VERSION = 0.005;
+    our $VERSION = 0.006;
+
+    sub bootstraps_bootstraps {
+        my $c = shift;
+        my $arg = shift;
+
+        my $css   = q{<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">};
+        my $theme = q{<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">};
+        my $js    = q{<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>};
+        my $jq    = q{<script src="//code.jquery.com/jquery-2.1.1.min.js"></script>};
+
+        return out(
+              !defined $arg  ? $css
+            : $arg eq 'css'  ? $css . $theme
+            : $arg eq 'js'   ? $js
+            : $arg eq 'jsq'  ? $jq . $js
+            : $arg eq 'all'  ? $css . $theme . $js
+            : $arg eq 'allq' ? $css . $theme . $jq . $js
+            :                 ''
+        );
+    }
 
     sub bootstrap_panel {
         my($c, $title, $callback, $content, $attr) = parse_call(@_);
         
-        #$attr = replace_context('panel_context');
-        $attr = add_classes($attr, 'panel', { panel_context => 'panel-%s', default => 'default'});
+        $attr = add_classes($attr, 'panel', { panel => 'panel-%s', panel_default => 'default'});
         
         my $tag = qq{
             <div class="$attr->{'class'}">
@@ -35,6 +54,23 @@ package Mojolicious::Plugin::BootstrapHelpers {
 
         return out($tag);
 
+    }
+
+    sub bootstrap_table {
+        my $c = shift;
+        my $callback = ref $_[-1] eq 'CODE' ? pop : undef;
+        my $content = undef; #scalar @_ % 2 ? pop : '';
+        my $attr = parse_attributes(@_);
+       
+        $attr = add_classes($attr, 'table', { table => 'table-%s' });
+
+        my $tag = qq{
+            <table class="$attr->{'class'}">
+            } . contents($callback, $content) . qq{
+            </table>
+        };
+
+        return out($tag);
     }
 
     sub bootstrap_formgroup {
@@ -68,7 +104,7 @@ package Mojolicious::Plugin::BootstrapHelpers {
         my @url = shift->@* if ref $_[0] eq 'ARRAY';
         my $attr = { @_ };
         
-        $attr = add_classes($attr, 'btn', { size => 'btn-%s', button_context => 'btn-%s' });
+        $attr = add_classes($attr, 'btn', { size => 'btn-%s', button => 'btn-%s' });
         $attr = cleanup_attrs($attr);
 
         # We have an url
@@ -103,7 +139,7 @@ package Mojolicious::Plugin::BootstrapHelpers {
 
         my @column_classes = get_column_classes($attr->{'column_information'}, 1);
         $tag_attr = add_classes($tag_attr, 'form-control', { size => 'input-%s' });
-        $tag_attr->{'id'} = $id;
+        $tag_attr->{'id'} //= $id;
         my $name_attr = $id =~ s{-}{_}r;
 
         my $prepend = delete $tag_attr->{'prepend'};
@@ -189,13 +225,16 @@ package Mojolicious::Plugin::BootstrapHelpers {
         my @classes = ($attr->{'class'}, @_);
 
         if(exists $formatter->{'size'}) {
-            push @classes => sprintfify_class($attr, $formatter->{'size'}, $formatter->{'default'}, _sizes());
+            push @classes => sprintfify_class($attr, $formatter->{'size'}, $formatter->{'size_default'}, _sizes());
         }
-        if(exists $formatter->{'button_context'}) {
-            push @classes => sprintfify_class($attr, $formatter->{'button_context'}, $formatter->{'default'}, _button_contexts());
+        if(exists $formatter->{'button'}) {
+            push @classes => sprintfify_class($attr, $formatter->{'button'}, $formatter->{'button_default'}, _button_contexts());
         }
-        if(exists $formatter->{'panel_context'}) {
-            push @classes => sprintfify_class($attr, $formatter->{'panel_context'}, $formatter->{'default'}, _panel_contexts());
+        if(exists $formatter->{'panel'}) {
+            push @classes => sprintfify_class($attr, $formatter->{'panel'}, $formatter->{'panel_default'}, _panel_contexts());
+        }
+        if(exists $formatter->{'table'}) {
+            push @classes => sprintfify_class($attr, $formatter->{'table'}, $formatter->{'table_default'}, _table_contexts());
         }
 
         $attr->{'class'} = trim join ' ' => sort @classes;
@@ -210,12 +249,12 @@ package Mojolicious::Plugin::BootstrapHelpers {
         my $possibilities = pop;
         my $default = shift;
 
-        my $found = (grep { exists $attr->{ $_ } } (keys $possibilities->%*))[0];
+        my @founds = (grep { exists $attr->{ $_ } } (keys $possibilities->%*));
 
-        return if !defined $found && !defined $default;
-        $found = $default if !defined $found;
+        return if !scalar @founds && !defined $default;
+        push @founds => $default if !scalar @founds;
 
-        return sprintf $format => $possibilities->{ $found };
+        return map { sprintf $format => $possibilities->{ $_ } } @founds;
 
     }
 
@@ -229,7 +268,11 @@ package Mojolicious::Plugin::BootstrapHelpers {
     sub cleanup_attrs {
         my $hash = shift;
         
-        map { delete $hash->{ $_ } } ('column_information', keys _sizes()->%*, keys _button_contexts()->%*, keys _panel_contexts()->%*);
+        map { delete $hash->{ $_ } } ('column_information',
+                                      keys _sizes()->%*,
+                                      keys _button_contexts()->%*,
+                                      keys _panel_contexts()->%*,
+                                      keys _table_contexts()->%*);
         # delete all attributes starting with __
         map { delete $hash->{ $_ } } grep { substr $_, 0 => 2 eq '__' } keys $hash->%*;
         return $hash;
@@ -256,6 +299,9 @@ package Mojolicious::Plugin::BootstrapHelpers {
     sub _panel_contexts {
         return { map { ("__$_" => $_, $_ => $_) } qw/default primary success info warning danger/ };
     }
+    sub _table_contexts {
+        return { map { ("__$_" => $_, $_ => $_) } qw/striped bordered hover condensed responsive/ };
+    }
 
     sub out {
         my $tag = shift;
@@ -273,6 +319,8 @@ package Mojolicious::Plugin::BootstrapHelpers {
         my $spx = setup_prefix($args->{'shortcut_prefix'});
         my $init_shortcuts = $args->{'init_shortcuts'} //= 1;
 
+        $app->helper($px.'bootstrap' => \&bootstraps_bootstraps);
+        $app->helper($px.'table' => \&bootstrap_table);
         $app->helper($px.'panel' => \&bootstrap_panel);
         $app->helper($px.'formgroup' => \&bootstrap_formgroup);
         $app->helper($px.'button' => \&bootstrap_button);
@@ -281,8 +329,9 @@ package Mojolicious::Plugin::BootstrapHelpers {
         if($init_shortcuts) {
             my @sizes = qw/xsmall small medium large/;
             my @contexts = qw/default primary success info warning danger/;
+            my @table = qw/striped bordered hover condensed responsive/;
 
-            foreach my $helper (@sizes, @contexts) {
+            foreach my $helper (@sizes, @contexts, @table) {
                $app->helper($spx.$helper, sub { ("__$helper" => 1) });
             }
         }
@@ -331,6 +380,53 @@ The goal is not to have tag helpers for everything, but for common use cases.
 
 All examples below (and more, see tests) is expected to work.
 
+
+=head2 How to use Bootstrap
+
+If you don't know what Bootstrap is, see L<http://www.getbootstrap.com/> for possible usages.
+
+You might want to use L<Mojolicious::Plugin::Bootstrap3> in your templates.
+
+To get going quickly by using the official CDN you can use the following helpers:
+    
+    # CSS
+    %= bootstrap
+
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    
+    # or (if you want to use the theme)
+    %= bootstrap 'theme'
+
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+    # And the javascript
+    %= bootstrap 'js'
+
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    # Or just:
+    %= bootstrap 'all'
+
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+It is also possible to automatically include jQuery (2.*)
+    
+    %= bootstrap 'jsq'
+    
+    <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    %= bootstrap 'allq'
+    
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+
 =head2 Shortcuts
 
 There are several shortcuts for context and size classes, that automatically expands to the correct class depending on which tag it is applied to.
@@ -341,11 +437,11 @@ For sizes, you can only use C<xsmall>, C<small>, C<medium> and C<large>, they ar
 
 The following shortcuts are available:
 
-   xsmall    default
-   small     primary
-   medium    success
-   large     info
-             warning
+   xsmall    default     striped
+   small     primary     bordered
+   medium    success     hover
+   large     info        condensed
+             warning     responsive
              danger
 
 See below for usage. B<Important:> You can't follow a shortcut with a fat comma (C<=E<gt>>). The fat comma auto-quotes the shortcut, and then the shortcut is not a shortcut anymore.
@@ -504,6 +600,32 @@ An ordinary button, with applied shortcuts.
 If the first argument after the button text is an array ref, it is used to populate C<href> and turns the button into a link. 
 The url is handed off L<url_for|Mojolicious::Controller#url_for>, so this is basically L<link_to|Mojolicious::Plugin::TagHelpers#link_to> with Bootstrap classes.
 
+
+
+=head2 Tables
+
+L<Bootstrap documentation|http://getbootstrap.com/css/#tables>
+
+    <%= table begin %>
+        <tr><td>Table 1</td></tr>
+    <% end %>
+
+    <table class="table">
+        <tr><td>Table 1</td></tr>
+    </table>
+
+A basic table.
+
+    %= table hover, striped, condensed, begin
+        <tr><td>Table 2</td></tr>
+    %  end
+
+    <table class="table table-condensed table-hover table-striped">
+        <tr><td>Table 2</td></tr>
+    </table>
+
+Several classes applied to the table.
+
 =head1 OPTIONS
 
 Some options are available:
@@ -562,7 +684,5 @@ Copyright 2014- Erik Carlsson
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
-
-=head1 SEE ALSO
 
 =cut
