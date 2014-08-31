@@ -26,11 +26,10 @@ requires:
   Mojolicious: '5.00'
   Scalar::Util: '1.29'
   String::Trim: '0.004'
-  Syntax::Collection::Basic: '0.02'
   experimental: '0.008'
   perl: '5.020000'
 resources:
   bugtracker: https://github.com/Csson/p5-mojolicious-plugin-bootstraphelpers/issues
   homepage: https://github.com/Csson/p5-mojolicious-plugin-bootstraphelpers
   repository: https://github.com/Csson/p5-mojolicious-plugin-bootstraphelpers.git
-version: '0.003'
+version: '0.004'

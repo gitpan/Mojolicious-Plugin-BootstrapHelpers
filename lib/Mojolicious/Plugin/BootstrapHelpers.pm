@@ -12,7 +12,7 @@ package Mojolicious::Plugin::BootstrapHelpers {
 
     use experimental 'postderef';
 
-    our $VERSION = 0.003;
+    our $VERSION = 0.004;
 
     sub bootstrap_panel {
         my($c, $title, $callback, $content, $attr) = parse_call(@_);
@@ -169,11 +169,10 @@ package Mojolicious::Plugin::BootstrapHelpers {
         my $attr = shift;
         my $index = shift;
 
-        my %sizes = _sizes()->@*;
         my @classes = ();
         foreach my $key (keys $attr->%*) {
-            my $correct_name = exists $sizes{ $key } ? $sizes{ $key } : $key;
-            if(exists $attr->{ $key } || exists $attr->{ $correct_name }) {
+            my $correct_name = get_size_for($key);
+            if(defined $correct_name) {
                 push @classes => sprintf "col-%s-%d" => $correct_name, $attr->{ $key }[ $index ];
             }
         }
@@ -207,18 +206,16 @@ package Mojolicious::Plugin::BootstrapHelpers {
     sub sprintfify_class {
         my $attr = shift;
         my $format = shift;
-        my %possibilities = pop->@*;
+        my $possibilities = pop;
         my $default = shift;
 
-        my $found = (grep { exists $attr->{ $_ } } (%possibilities))[0];
+        my $found = (grep { exists $attr->{ $_ } } (keys $possibilities->%*))[0];
 
         return if !defined $found && !defined $default;
         $found = $default if !defined $found;
 
-        #* translate to bootstrap vocabulary (eg. large => lg)
-        my $correct_name = exists $possibilities{ $found } ? $possibilities{ $found } : $found;
+        return sprintf $format => $possibilities->{ $found };
 
-        return sprintf $format => $correct_name;
     }
 
     sub contents {
@@ -231,21 +228,32 @@ package Mojolicious::Plugin::BootstrapHelpers {
     sub cleanup_attrs {
         my $hash = shift;
         
-        map { delete $hash->{ $_ } } ('column_information', _sizes()->@*, _contexts()->@*, _button_contexts()->@*, _panel_contexts()->@*);
+        map { delete $hash->{ $_ } } ('column_information', keys _sizes()->%*, keys _button_contexts()->%*, keys _panel_contexts()->%*);
+        # delete all attributes starting with __
+        map { delete $hash->{ $_ } } grep { substr $_, 0 => 2 eq '__' } keys $hash->%*;
         return $hash;
     }
 
-    sub _sizes {
-        return [qw/xsmall xs  small sm  medium md  large lg/];
+    sub get_size_for {
+        my $input = shift;
+
+        return _sizes()->{ $input };
     }
+
+    sub _sizes {
+        return {
+            __xsmall => 'xs', xsmall => 'xs', xs => 'xs',
+            __small  => 'sm', small  => 'sm', sm => 'sm',
+            __medium => 'md', medium => 'md', md => 'md',
+            __large  => 'lg', large  => 'lg', lg => 'lg',
+        }
+    }
+
     sub _button_contexts {
-        return [qw/default default primary primary success success info info warning warning danger danger link link/];
+        return { map { ("__$_" => $_, $_ => $_) } qw/default primary success info warning danger link/ };
     }
     sub _panel_contexts {
-        return [qw/default default primary primary success success info info warning warning danger danger/];
-    }
-    sub _contexts {
-        return [qw/active active success success info info warning warning danger danger/];
+        return { map { ("__$_" => $_, $_ => $_) } qw/default primary success info warning danger/ };
     }
 
     sub out {
@@ -260,20 +268,23 @@ package Mojolicious::Plugin::BootstrapHelpers {
         my $app = shift;
         my $args = shift;
 
-        my $px = setup_prefix($args->{'global_prefix'});
+        my $px = setup_prefix($args->{'tag_prefix'});
         my $spx = setup_prefix($args->{'shortcut_prefix'});
-        my $suppress_shortcuts = $args->{'suppress_shortcuts'} //= 0;
+        my $init_shortcuts = $args->{'init_shortcuts'} //= 1;
 
-        add_helper($app, $px, panel => \&bootstrap_panel);
-        add_helper($app, $px, formgroup => \&bootstrap_formgroup);
-        add_helper($app, $px, button => \&bootstrap_button);
-        add_helper($app, $px, submit_button => \&bootstrap_submit);
+        $app->helper($px.'panel' => \&bootstrap_panel);
+        $app->helper($px.'formgroup' => \&bootstrap_formgroup);
+        $app->helper($px.'button' => \&bootstrap_button);
+        $app->helper($px.'submit_button' => \&bootstrap_submit);
 
-        if(!$suppress_shortcuts) {
-            add_helper($app, $spx, large => sub { (large => 1) });
-            add_helper($app, $spx, success => sub { (success => 1) });
+        if($init_shortcuts) {
+            my @sizes = qw/xsmall small medium large/;
+            my @contexts = qw/default primary success info warning danger/;
+
+            foreach my $helper (@sizes, @contexts) {
+               $app->helper($spx.$helper, sub { ("__$helper" => 1) });
+            }
         }
-
     }
 
     sub setup_prefix {
@@ -286,14 +297,6 @@ package Mojolicious::Plugin::BootstrapHelpers {
              ;
     }
 
-    sub add_helper {
-        my $app = shift;
-        my $prefix = shift;
-        my $helper = shift;
-        my $method = shift;
-
-        $app->helper($prefix.$helper => $method);
-    }
 }
 __END__
 
@@ -325,7 +328,28 @@ Mojolicious::Plugin::BootstrapHelpers is a convenience plugin that reduces some 
 
 The goal is not to have tag helpers for everything, but for common use cases.
 
-All examples below (and more, see tests) currently works.
+All examples below (and more, see tests) is expected to work.
+
+=head2 Shortcuts
+
+There are several shortcuts for context and size classes, that automatically expands to the correct class depending on which tag it is applied to.
+
+For instance, if you apply the C<info> shortcut to a panel, it becomes C<panel-info>, but when applied to a button it becomes C<btn-info>.
+
+For sizes, you can only use C<xsmall>, C<small>, C<medium> and C<large>, they are shortened to the Bootstrap type classes.
+
+The following shortcuts are available:
+
+   xsmall    default
+   small     primary
+   medium    success
+   large     info
+             warning
+             danger
+
+See below for usage. B<Important:> You can't follow a shortcut with a fat comma (C<=E<gt>>). The fat comma auto-quotes the shortcut, and then the shortcut is not a shortcut anymore.
+
+If there is no corresponding class for the element you add the shortcut to it is automatically removed.
 
 =head2 Panels
 
@@ -340,6 +364,8 @@ L<Bootstrap documentation|http://getbootstrap.com/components/#panels>
         </div>
     </div>
 
+The class is set to C<panel-default>, by default.
+
 =head3 Body, no title
 
     %= panel undef ,=> begin
@@ -351,6 +377,8 @@ L<Bootstrap documentation|http://getbootstrap.com/components/#panels>
             <p>A short text.</p>
         </div>
     </div>
+
+If you want a panel without title, set the title to C<undef>. Note that you can't use a regular fat comma since that would turn undef into a string.
 
 =head3 Body and title
 
@@ -369,7 +397,7 @@ L<Bootstrap documentation|http://getbootstrap.com/components/#panels>
 
 =head3 Body and title, with context
     
-    %= panel 'Panel 5', success => 1 => begin
+    %= panel 'Panel 5', success, begin
         <p>A short text.</p>
     %  end
     
@@ -381,6 +409,8 @@ L<Bootstrap documentation|http://getbootstrap.com/components/#panels>
             <p>A short text.</p>
         </div>
     </div>
+
+The first shortcut, C<success>. This applies C<.panel-success>.
 
 =head2 Form groups
 
@@ -399,7 +429,7 @@ The first item in the array ref is used for both C<id> and C<name>.
 
 =head3 Input group (before), and large input field
 
-    %= formgroup 'Text test 4', text_field => ['test_text', append => '.00', large => 1]
+    %= formgroup 'Text test 4', text_field => ['test_text', append => '.00', large]
 
     <div class="form-group">
         <label class="control-label" for="test_text">Text test 4</label>
@@ -408,6 +438,8 @@ The first item in the array ref is used for both C<id> and C<name>.
             <span class="input-group-addon">.00</span>
         </div>
     </div>
+
+Shortcuts can also be used in this context. Here C<large> applies C<.input-lg>.
 
 =head3 Input group (before and after), and with value
 
@@ -426,14 +458,14 @@ The (optional) second item in the array ref is the value, if any, that should po
 
 =head3 Large input group
 
-    %= formgroup 'Text test 6', text_field => ['test_text'], large => 1
+    %= formgroup 'Text test 6', text_field => ['test_text'], large
 
     <div class="form-group form-group-lg">
         <label class="control-label" for="test_text">Text test 6</label>
         <input class="form-control" id="test_text" name="test_text" type="text" />
     </div>
 
-Note the difference with the earlier example. Here C<large =E<gt> 1> is outside the C<text_field> array ref, and therefore is applied to the form group. 
+Note the difference with the earlier example. Here C<large> is outside the C<text_field> array ref, and therefore C<.form-group-lg> is applied to the form group. 
 
 =head3 Horizontal form groups
     
@@ -446,7 +478,53 @@ Note the difference with the earlier example. Here C<large =E<gt> 1> is outside 
         </div>
     </div>
 
-If the C<form> has the C<form-horizontal> class, you can set the column widths with the C<cols> attribute. The first item in each array ref is for the label, and the second for the input.
+If the C<form> C<.form-horizontal>, you can set the column widths with the C<cols> attribute. The first item in each array ref is for the label, and the second for the input.
+
+=head1 OPTIONS
+
+Some options are available:
+
+    $app->plugin('BootstrapHelpers', {
+        tag_prefix => 'bs',
+        shortcut_prefix => 'set',
+        init_shortcuts => 1,
+    });
+
+=head2 tag_prefix
+
+Default: C<undef>
+
+If you want to you change the name of the tag helpers, by applying a prefix. These are not aliases, 
+by using the prefix to original names are no longer available. The following rules are used:
+
+=over 4
+
+=item *
+If the option is missing, or is C<undef>, there is no prefix.
+
+=item *
+If the option is set to the empty string, the prefix is C<_>. That is, C<panel> is now used as C<_panel>.
+
+=item *
+If the option is set to any other string, the prefix is that string followed by C<_>. If you set C<tag_prefix =E<gt> 'bs'>, then C<panel> is now used as C<bs_panel>.
+
+=back
+
+
+=head2 shortcut_prefix
+
+Default: C<undef>
+
+This is similar to C<tag_prefix>, but is instead applied to the shortcuts. The same rules applies.
+
+
+=head2 init_shortcuts
+
+Default: C<1>
+
+If you don't want the shortcuts setup at all, set this option to a defined but false value.
+
+All functionality is available, but instead of C<warning> you must now use C<__warning =E<gt> 1>. That is why they are shortcuts.
 
 =head1 AUTHOR
 
