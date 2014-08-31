@@ -65,8 +65,8 @@ test($test, 'panel', @panels);
 my @formgroups = (
     q{
         <div class="form-group">
-            <label class="control-label" for="test_text">Text test 1</label>
-            <input class="form-control" id="test_text" name="test_text" type="text" />
+            <label class="control-label" for="test-text">Text test 1</label>
+            <input class="form-control" id="test-text" name="test_text" type="text" />
         </div>
     },
     q{
@@ -128,7 +128,7 @@ test($test, 'formgroup', @formgroups);
 
 
 my @buttons = (
-    q{<a class="btn btn-lg" href="http://www.example.com/">The example 1</a>},
+    q{<a class="btn btn-sm" href="http://www.example.com/">The example 1</a>},
     q{<a class="btn" href="/button_2">The example 2</a>},
     q{<a class="btn" href="/panel_1">The example 3</a>},
     q{<button class="btn">The example 4</button>},
@@ -181,7 +181,7 @@ __DATA__
 
 
 @@ formgroup_1.html.ep
-%= formgroup 'Text test 1', text_field => ['test_text']
+%= formgroup 'Text test 1', text_field => ['test-text']
 
 @@ formgroup_2.html.ep
 %= formgroup 'Text test 2', text_field => ['test_text', size => 30]
@@ -208,7 +208,7 @@ __DATA__
 
 
 @@ button_1.html.ep
-%= button 'The example 1' => ['http://www.example.com/'], lg => 1
+%= button 'The example 1' => ['http://www.example.com/'], small
 
 @@ button_2.html.ep
 %= button 'The example 2' => [url_for]
