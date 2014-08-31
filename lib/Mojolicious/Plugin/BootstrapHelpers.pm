@@ -12,7 +12,7 @@ package Mojolicious::Plugin::BootstrapHelpers {
 
     use experimental 'postderef';
 
-    our $VERSION = 0.006;
+    our $VERSION = 0.007;
 
     sub bootstraps_bootstraps {
         my $c = shift;
@@ -358,11 +358,23 @@ Mojolicious::Plugin::BootstrapHelpers - Type less bootstrap
 
 =head1 SYNOPSIS
 
-  # Mojolicious
-  $self->plugin('BootstrapHelpers');
+    # Mojolicious
+    $self->plugin('BootstrapHelpers');
 
-  # ::Lite
-  plugin 'BootstrapHelpers';
+    # ::Lite
+    plugin 'BootstrapHelpers';
+
+    # Meanwhile, somewhere in a template...
+    %= formgroup 'Email' => text_field => ['email-address', prepend => '@'], large
+
+    # ...that renders into
+    <div class="form-group form-group-lg">
+        <label class="control-label" for="email-address">Email</label>
+        <div class="input-group">
+            <span class="input-group-addon">@</span>
+            <input class="form-control" id="email-address" name="email_address" type="text" />
+        </div>
+    </div>
 
 =head1 STATUS
 
@@ -370,7 +382,7 @@ This is an unstable work in progress. Backwards compatibility is currently not t
 
 Currently supported Bootstrap version: 3.2.0.
 
-Only Perl 5.20+ is supported (thanks to postderef). This might change.
+Currently only Perl 5.20+ is supported (thanks to postderef).
 
 =head1 DESCRIPTION
 
@@ -430,10 +442,11 @@ It is also possible to automatically include jQuery (2.*)
 =head2 Shortcuts
 
 There are several shortcuts for context and size classes, that automatically expands to the correct class depending on which tag it is applied to.
+They can be seen as a hash key and value merged into one.
 
 For instance, if you apply the C<info> shortcut to a panel, it becomes C<panel-info>, but when applied to a button it becomes C<btn-info>.
 
-For sizes, you can only use C<xsmall>, C<small>, C<medium> and C<large>, they are shortened to the Bootstrap type classes.
+For sizes, you can only use the longform (C<xsmall>, C<small>, C<medium> and C<large>), they are shortened to the Bootstrap type classes.
 
 The following shortcuts are available:
 
@@ -446,13 +459,43 @@ The following shortcuts are available:
 
 See below for usage. B<Important:> You can't follow a shortcut with a fat comma (C<=E<gt>>). The fat comma auto-quotes the shortcut, and then the shortcut is not a shortcut anymore.
 
-If there is no corresponding class for the element you add the shortcut to it is automatically removed.
+If there is no corresponding class for the element you add the shortcut to it is silently not applied.
+
+=begin html
+
+You can turn off shortcuts, see <a href="#init_shortcuts">init_shortcuts</a>.
+
+=end html
+
 
 =head2 Panels
 
 L<Bootstrap documentation|http://getbootstrap.com/components/#panels>
 
-=head3 No body, no title
+=head4 Syntax
+
+    %= panel
+
+    %= panel $title, @shortcuts, begin
+        $body
+    %  end
+
+B<C<$title>>
+
+Usually mandatory, but can be omitted if there are no other arguments to the C<panel>. Otherwise, if you don't want a title, set it C<undef>.
+
+B<C<@shortcuts>>
+
+Optional hash. Any shortcuts you want applied to the C<panel>.
+
+B<C<$body>>
+
+Optional (but panels are not much use without it). The html inside the C<panel>.
+
+
+=head3 Examples
+
+=head4 No body, no title
 
     %= panel
 
@@ -463,7 +506,7 @@ L<Bootstrap documentation|http://getbootstrap.com/components/#panels>
 
 The class is set to C<panel-default>, by default.
 
-=head3 Body, no title
+=head4 Body, no title
 
     %= panel undef ,=> begin
         <p>A short text.</p>
@@ -475,9 +518,9 @@ The class is set to C<panel-default>, by default.
         </div>
     </div>
 
-If you want a panel without title, set the title to C<undef>. Note that you can't use a regular fat comma since that would turn undef into a string.
+If you want a panel without title, set the title to C<undef>. Note that you can't use a regular fat comma since that would turn undef into a string. A normal comma is of course also ok.
 
-=head3 Body and title
+=head4 Body and title
 
     %= panel 'The header' => begin
         <p>A short text.</p>
@@ -492,7 +535,7 @@ If you want a panel without title, set the title to C<undef>. Note that you can'
         </div>
     </div>
 
-=head3 Body and title, with context
+=head4 Body and title, with context
     
     %= panel 'Panel 5', success, begin
         <p>A short text.</p>
@@ -515,7 +558,102 @@ The first shortcut, C<success>. This applies C<.panel-success>.
 
 L<Bootstrap documentation|http://getbootstrap.com/css/#forms>
 
-=head3 Basic form group
+=head3 Syntax
+
+    %= formgroup $labeltext, %arguments
+
+    %= formgroup %arguments, begin
+        $labeltext
+    %  end
+
+    # %arguments:
+    cols => { $size => [ $label_columns, $input_columns ], ... },
+    @shortcuts
+    $fieldtype => $field_setting[],
+    
+    # $field_setting[]
+    $name,
+    $value,
+    %field_arguments
+
+    # %field_arguments
+    %html_attributes,
+    %prepend,
+    %append,
+    @shortcuts
+
+B<C<$labeltext>>
+
+Mandatory. It is either the first argument, or placed in the body.
+
+B<C<%arguments>>
+
+Mandatory. A hash:
+
+=over 4
+
+B<C<cols>>
+
+Optional hash reference. It is only used when the C<form> is a C<.form-horizontal>. 
+C<$size> is one of C<xsmall>, C<small>, C<medium>, or C<large>. C<$size> takes a two item array 
+reference: C<$label_columns> is the number of columns that should be used by the label for 
+that size, and C<$input_columns> is the number of columns used for the input field for that size.
+
+You can defined the widths for one or more or all of the sizes.
+
+B<C<@shortcuts>>
+
+Optional. One or more shortcuts that you want applied to the C<.form-group> element.
+
+B<C<$fieldtype>>
+
+Mandatory. Is one of C<text_field>, C<password_field>, C<datetime_field>, C<date_field>, C<month_field>, C<time_field>, C<week_field>, 
+C<number_field>, C<email_field>, C<url_field>, C<search_field>, C<tel_field>, C<color_field>.
+
+There can be only one C<$fieldtype> per C<formgroup>. (Behavior if having more than one is not defined.)
+
+B<C<$field_setting[]>>
+
+Mandatory. An array reference:
+
+=over 4
+
+B<C<$name>>
+
+Mandatory. It sets both the C<id> and C<name> of the input field. If the C<$name> contains dashes then those are translated
+into underscores when setting the C<name>. If C<$field_arguments{'id'}> exists then that is used for the C<id> instead.
+
+B<C<$value>>
+
+Optional. It is the same as setting C<$field_arguments{'value'}>. (But don't do both for the same field.)
+
+B<C<%field_arguments>>
+
+Optional. A hash:
+
+=over 4
+
+B<C<%html_attributes>>
+
+Optional. All html attributes you want to set on the C<input>.
+
+B<C<%prepend>> and B<C<%append>>
+
+Optional. Can be used individually or together. They are used to create L<input groups|http://getbootstrap.com/components/#input-groups>.
+
+B<C<@shortcuts>>
+
+Optional. All shortcuts you want applied to the C<input>.
+
+=back
+
+=back
+
+=back
+
+=head3 Examples
+
+=head4 Basic form group
     
     %= formgroup 'Text test 1', text_field => ['test_text']
 
@@ -526,7 +664,7 @@ L<Bootstrap documentation|http://getbootstrap.com/css/#forms>
 
 The first item in the array ref is used for both C<id> and C<name>. Except...
 
-=head3 Input group (before), and large input field
+=head4 Input group (before), and large input field
 
     %= formgroup 'Text test 4', text_field => ['test-text', append => '.00', large]
 
@@ -542,7 +680,7 @@ Shortcuts can also be used in this context. Here C<large> applies C<.input-lg>.
 
 If the input name (the first item in the text_field array ref) contains dashes, those are replaced (in the C<name>) to underscores.
 
-=head3 Input group (before and after), and with value
+=head4 Input group (before and after), and with value
 
     %= formgroup 'Text test 5', text_field => ['test_text', '200', prepend => '$', append => '.00']
 
@@ -557,7 +695,7 @@ If the input name (the first item in the text_field array ref) contains dashes, 
 
 The (optional) second item in the array ref is the value, if any, that should populate the input tag.
 
-=head3 Large input group
+=head4 Large input group
 
     %= formgroup 'Text test 6', text_field => ['test_text'], large
 
@@ -568,7 +706,7 @@ The (optional) second item in the array ref is the value, if any, that should po
 
 Note the difference with the earlier example. Here C<large> is outside the C<text_field> array ref, and therefore C<.form-group-lg> is applied to the form group. 
 
-=head3 Horizontal form groups
+=head4 Horizontal form groups
     
     %= formgroup 'Text test 8', text_field => ['test_text'], cols => { medium => [2, 10], small => [4, 8] }
 
@@ -580,6 +718,8 @@ Note the difference with the earlier example. Here C<large> is outside the C<tex
     </div>
 
 If the C<form> is C<.form-horizontal>, you can set the column widths with the C<cols> attribute. The first item in each array ref is for the label, and the second for the input.
+
+(Note that in this context, C<medium> and C<large> are not shortcuts. Shortcuts don't take arguments.)
 
 
 
@@ -640,8 +780,8 @@ Some options are available:
 
 Default: C<undef>
 
-If you want to you change the name of the tag helpers, by applying a prefix. These are not aliases, 
-by using the prefix to original names are no longer available. The following rules are used:
+If you want to you change the name of the tag helpers, by applying a prefix. These are not aliases; 
+by setting a prefix the original names are no longer available. The following rules are used:
 
 =over 4
 
@@ -670,7 +810,9 @@ Default: C<1>
 
 If you don't want the shortcuts setup at all, set this option to a defined but false value.
 
-All functionality is available, but instead of C<warning> you must now use C<__warning =E<gt> 1>. That is why they are shortcuts.
+All functionality is available, but instead of C<warning> you must now use C<__warning =E<gt> 1>. That is why they are called shortcuts.
+
+With shortcuts turned off, sizes are only supported in longform: C<__xsmall>, C<__small>, C<__medium> and C<__large>.
 
 =head1 AUTHOR
 
@@ -679,6 +821,10 @@ Erik Carlsson E<lt>csson@cpan.orgE<gt>
 =head1 COPYRIGHT
 
 Copyright 2014- Erik Carlsson
+
+Bootstrap itself is (c) Twitter. See L<their license information|http://getbootstrap.com/getting-started/#license-faqs>.
+
+L<Mojolicious::Plugin::BootstrapHelpers> is third party software, and is not endorsed by Twitter.
 
 =head1 LICENSE
 

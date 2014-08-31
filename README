@@ -2,11 +2,23 @@ NAME
     Mojolicious::Plugin::BootstrapHelpers - Type less bootstrap
 
 SYNOPSIS
-      # Mojolicious
-      $self->plugin('BootstrapHelpers');
+        # Mojolicious
+        $self->plugin('BootstrapHelpers');
 
-      # ::Lite
-      plugin 'BootstrapHelpers';
+        # ::Lite
+        plugin 'BootstrapHelpers';
+
+        # Meanwhile, somewhere in a template...
+        %= formgroup 'Email' => text_field => ['email-address', prepend => '@'], large
+
+        # ...that renders into
+        <div class="form-group form-group-lg">
+            <label class="control-label" for="email-address">Email</label>
+            <div class="input-group">
+                <span class="input-group-addon">@</span>
+                <input class="form-control" id="email-address" name="email_address" type="text" />
+            </div>
+        </div>
 
 STATUS
     This is an unstable work in progress. Backwards compatibility is
@@ -14,7 +26,7 @@ STATUS
 
     Currently supported Bootstrap version: 3.2.0.
 
-    Only Perl 5.20+ is supported (thanks to postderef). This might change.
+    Currently only Perl 5.20+ is supported (thanks to postderef).
 
 DESCRIPTION
     Mojolicious::Plugin::BootstrapHelpers is a convenience plugin that
@@ -75,13 +87,13 @@ DESCRIPTION
   Shortcuts
     There are several shortcuts for context and size classes, that
     automatically expands to the correct class depending on which tag it is
-    applied to.
+    applied to. They can be seen as a hash key and value merged into one.
 
     For instance, if you apply the "info" shortcut to a panel, it becomes
     "panel-info", but when applied to a button it becomes "btn-info".
 
-    For sizes, you can only use "xsmall", "small", "medium" and "large",
-    they are shortened to the Bootstrap type classes.
+    For sizes, you can only use the longform ("xsmall", "small", "medium"
+    and "large"), they are shortened to the Bootstrap type classes.
 
     The following shortcuts are available:
 
@@ -97,11 +109,33 @@ DESCRIPTION
     shortcut is not a shortcut anymore.
 
     If there is no corresponding class for the element you add the shortcut
-    to it is automatically removed.
+    to it is silently not applied.
 
   Panels
     Bootstrap documentation <http://getbootstrap.com/components/#panels>
 
+   Syntax
+        %= panel
+
+        %= panel $title, @shortcuts, begin
+            $body
+        %  end
+
+    $title
+
+    Usually mandatory, but can be omitted if there are no other arguments to
+    the "panel". Otherwise, if you don't want a title, set it "undef".
+
+    @shortcuts
+
+    Optional hash. Any shortcuts you want applied to the "panel".
+
+    $body
+
+    Optional (but panels are not much use without it). The html inside the
+    "panel".
+
+   Examples
    No body, no title
         %= panel
 
@@ -125,7 +159,7 @@ DESCRIPTION
 
     If you want a panel without title, set the title to "undef". Note that
     you can't use a regular fat comma since that would turn undef into a
-    string.
+    string. A normal comma is of course also ok.
 
    Body and title
         %= panel 'The header' => begin
@@ -160,6 +194,99 @@ DESCRIPTION
   Form groups
     Bootstrap documentation <http://getbootstrap.com/css/#forms>
 
+   Syntax
+        %= formgroup $labeltext, %arguments
+
+        %= formgroup %arguments, begin
+            $labeltext
+        %  end
+
+        # %arguments:
+        cols => { $size => [ $label_columns, $input_columns ], ... },
+        @shortcuts
+        $fieldtype => $field_setting[],
+    
+        # $field_setting[]
+        $name,
+        $value,
+        %field_arguments
+
+        # %field_arguments
+        %html_attributes,
+        %prepend,
+        %append,
+        @shortcuts
+
+    $labeltext
+
+    Mandatory. It is either the first argument, or placed in the body.
+
+    %arguments
+
+    Mandatory. A hash:
+
+        "cols"
+
+        Optional hash reference. It is only used when the "form" is a
+        ".form-horizontal". $size is one of "xsmall", "small", "medium", or
+        "large". $size takes a two item array reference: $label_columns is
+        the number of columns that should be used by the label for that
+        size, and $input_columns is the number of columns used for the input
+        field for that size.
+
+        You can defined the widths for one or more or all of the sizes.
+
+        @shortcuts
+
+        Optional. One or more shortcuts that you want applied to the
+        ".form-group" element.
+
+        $fieldtype
+
+        Mandatory. Is one of "text_field", "password_field",
+        "datetime_field", "date_field", "month_field", "time_field",
+        "week_field", "number_field", "email_field", "url_field",
+        "search_field", "tel_field", "color_field".
+
+        There can be only one $fieldtype per "formgroup". (Behavior if
+        having more than one is not defined.)
+
+        $field_setting[]
+
+        Mandatory. An array reference:
+
+            $name
+
+            Mandatory. It sets both the "id" and "name" of the input field.
+            If the $name contains dashes then those are translated into
+            underscores when setting the "name". If $field_arguments{'id'}
+            exists then that is used for the "id" instead.
+
+            $value
+
+            Optional. It is the same as setting $field_arguments{'value'}.
+            (But don't do both for the same field.)
+
+            %field_arguments
+
+            Optional. A hash:
+
+                %html_attributes
+
+                Optional. All html attributes you want to set on the
+                "input".
+
+                %prepend and %append
+
+                Optional. Can be used individually or together. They are
+                used to create input groups
+                <http://getbootstrap.com/components/#input-groups>.
+
+                @shortcuts
+
+                Optional. All shortcuts you want applied to the "input".
+
+   Examples
    Basic form group
         %= formgroup 'Text test 1', text_field => ['test_text']
 
@@ -229,6 +356,9 @@ DESCRIPTION
     the "cols" attribute. The first item in each array ref is for the label,
     and the second for the input.
 
+    (Note that in this context, "medium" and "large" are not shortcuts.
+    Shortcuts don't take arguments.)
+
   Buttons
     Bootstrap documentation <http://getbootstrap.com/css/#buttons>
 
@@ -282,8 +412,8 @@ OPTIONS
     Default: "undef"
 
     If you want to you change the name of the tag helpers, by applying a
-    prefix. These are not aliases, by using the prefix to original names are
-    no longer available. The following rules are used:
+    prefix. These are not aliases; by setting a prefix the original names
+    are no longer available. The following rules are used:
 
     *   If the option is missing, or is "undef", there is no prefix.
 
@@ -307,13 +437,22 @@ OPTIONS
     defined but false value.
 
     All functionality is available, but instead of "warning" you must now
-    use "__warning => 1". That is why they are shortcuts.
+    use "__warning => 1". That is why they are called shortcuts.
+
+    With shortcuts turned off, sizes are only supported in longform:
+    "__xsmall", "__small", "__medium" and "__large".
 
 AUTHOR
     Erik Carlsson <csson@cpan.org>
 
 COPYRIGHT
     Copyright 2014- Erik Carlsson
+
+    Bootstrap itself is (c) Twitter. See their license information
+    <http://getbootstrap.com/getting-started/#license-faqs>.
+
+    Mojolicious::Plugin::BootstrapHelpers is third party software, and is
+    not endorsed by Twitter.
 
 LICENSE
     This library is free software; you can redistribute it and/or modify it
