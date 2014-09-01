@@ -12,7 +12,7 @@ package Mojolicious::Plugin::BootstrapHelpers {
 
     use experimental 'postderef';
 
-    our $VERSION = 0.008;
+    our $VERSION = 0.009;
 
     sub bootstraps_bootstraps {
         my $c = shift;
@@ -75,9 +75,10 @@ package Mojolicious::Plugin::BootstrapHelpers {
         my $attr = parse_attributes(@_);
         
         $attr = add_classes($attr, 'table', { table => 'table-%s' });
+        my $html = htmlify_attrs($attr);
 
         my $table = qq{
-            <table class="$attr->{'class'}">
+            <table class="$attr->{'class'}"$html>
             } . $callback->() . qq{
             </table>
         };
@@ -90,15 +91,25 @@ package Mojolicious::Plugin::BootstrapHelpers {
         return defined $title ? create_panel($title, $table, $attr->{'panel'}) : out($table);
     }
 
+    sub htmlify_attrs {
+        my $attr = cleanup_attrs({shift->%*}); #* Make a copy
+
+        my $html = join ' ' => map { qq{$_="$attr->{ $_ }"} } sort keys $attr->%*;
+        return ' ' . $html if defined $html;
+        return '';
+    }
+
     sub bootstrap_formgroup {
         my $c = shift;
-        my $title = ref $_[-1] eq 'CODE' ? pop : shift;
+        my $title = ref $_[-1] eq 'CODE' ? pop 
+                  : scalar @_ % 2        ? shift
+                  :                        undef;
         my $attr = parse_attributes(@_);
         
         $attr->{'column_information'} = delete $attr->{'cols'} if ref $attr->{'cols'} eq 'HASH';
 
         my($id, $input) = fix_input($c, $attr);
-        my $label = fix_label($c, $id, $title, $attr);
+        my $label = defined $title ? fix_label($c, $id, $title, $attr) : '';
 
         $attr = add_classes($attr, 'form-group', { size => 'form-group-%s'});
         $attr = cleanup_attrs($attr);
@@ -157,7 +168,7 @@ package Mojolicious::Plugin::BootstrapHelpers {
         my @column_classes = get_column_classes($attr->{'column_information'}, 1);
         $tag_attr = add_classes($tag_attr, 'form-control', { size => 'input-%s' });
         $tag_attr->{'id'} //= $id;
-        my $name_attr = $id =~ s{-}{_}r;
+        my $name_attr = $id =~ s{-}{_}rg;
 
         my $prepend = delete $tag_attr->{'prepend'};
         my $append = delete $tag_attr->{'append'};
@@ -286,6 +297,7 @@ package Mojolicious::Plugin::BootstrapHelpers {
         my $hash = shift;
         
         map { delete $hash->{ $_ } } ('column_information',
+                                      'panel',
                                       keys _sizes()->%*,
                                       keys _button_contexts()->%*,
                                       keys _panel_contexts()->%*,
@@ -424,8 +436,8 @@ To get going quickly by using the official CDN you can use the following helpers
     # or (if you want to use the theme)
     %= bootstrap 'theme'
 
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
 
     # And the javascript
     %= bootstrap 'js'
@@ -496,13 +508,15 @@ You can turn off the short forms, see <a href="#init_short_strappings">init_shor
 
 In the syntax sections below the following conventions are used:
     
-    name      A specific string
-    $name     Any string
-    $name[]   An array reference  (ordering significant)
-    %name     A hash              (ordering not significant)
-    $name{}   A hash reference    (ordering not significant)
+    name        A specific string
+    $name       Any string
+    $name[]     An array reference  (ordering significant)
+    %name       A hash              (ordering not significant)
+    $name{}     A hash reference    (ordering not significant)
+    (optional)  Anything inside parenthesis is optional
 
 
+=head1 HELPERS
 
 =head2 Panels
 
@@ -510,11 +524,9 @@ L<Bootstrap documentation|http://getbootstrap.com/components/#panels>
 
 =head3 Syntax
 
-    %= panel
-
-    %= panel $title, %strappings, begin
+    %= panel ($title, ((%strappings,) begin
         $body
-    %  end
+    %  end))
 
 B<C<$title>>
 
@@ -522,7 +534,7 @@ Usually mandatory, but can be omitted if there are no other arguments to the C<p
 
 B<C<%strappings>>
 
-Optional hash. Any strapping you want applied to the C<panel>.
+Optional. Any strapping you want applied to the C<panel>.
 
 B<C<$body>>
 
@@ -596,48 +608,68 @@ L<Bootstrap documentation|http://getbootstrap.com/css/#forms>
 
 =head3 Syntax
 
-    %= formgroup $labeltext, %arguments
+    %= formgroup ($labeltext,) %arguments
 
     %= formgroup %arguments, begin
         $labeltext
     %  end
 
     # %arguments:
-    cols => { $size => [ $label_columns, $input_columns ], ... },
-    %strappings
+    (cols => $size_definitions{})
+    (%group_strappings)
     $fieldtype => $field_setting[],
     
     # $field_setting[]
     $name,
-    $value,
-    %field_arguments
+    ($value,)
+    (%field_arguments)
+    
+    # $size_definitions{}
+    { $size => [ $label_columns, $input_columns ](, ...) },
 
     # %field_arguments
-    %html_attributes,
-    %prepend,
-    %append,
-    %strappings
+    (%html_attributes,)
+    (prepend => $to_prepend,)
+    (append => $to_append,)
+    (%field_strappings)
 
 B<C<$labeltext>>
 
-Mandatory. It is either the first argument, or placed in the body.
+Optional. It is either the first argument, or placed in the body. It creates a C<label> element before the C<input>.
 
 B<C<%arguments>>
 
-Mandatory. A hash:
+Mandatory:
 
 =over 4
 
-B<C<cols>>
+B<C<cols =E<gt> $size_definitions{}>>
 
-Optional hash reference. It is only used when the C<form> is a C<.form-horizontal>. 
-C<$size> is one of C<xsmall>, C<small>, C<medium>, or C<large>. C<$size> takes a two item array 
-reference: C<$label_columns> is the number of columns that should be used by the label for 
-that size, and C<$input_columns> is the number of columns used for the input field for that size.
+Optional key-value pair. It is only used when the C<form> is a C<.form-horizontal>. You can define the widths for one or more or all of the sizes.
 
-You can defined the widths for one or more or all of the sizes.
+=over 4
 
-B<C<%strappings>>
+B<C<$size>>
+
+Mandatory. It is one of C<xsmall>, C<small>, C<medium>, or C<large>. 
+C<$size> takes a two item array reference:
+
+=over 4
+
+B<C<$label_columns>>
+
+Mandatory. The number of columns that should be used by the label for that size.
+
+B<C<$input_columns>>
+
+Mandatory. The number of columns used for the input field for that size.
+
+=back
+
+=back
+
+
+B<C<%group_strappings>>
 
 Optional hash. One or more strappings you want applied to the C<.form-group> element.
 
@@ -673,11 +705,33 @@ B<C<%html_attributes>>
 
 Optional. All html attributes you want to set on the C<input>.
 
-B<C<%prepend>> and B<C<%append>>
 
-Optional. Can be used individually or together. They are used to create L<input groups|http://getbootstrap.com/components/#input-groups>.
+B<C<prepend =E<gt> $to_prepend>>
 
-B<C<%strappings>>
+Optional key-value pair. Can be used with C<append>. They are used to create L<input groups|http://getbootstrap.com/components/#input-groups>.
+
+=over 4
+
+B<C<$prepend>>
+
+This string is placed directly in front of the C<input>.
+
+=back
+
+B<C<append =E<gt> $to_append>>
+
+Optional key-value pair. Can be used with C<prepend>.
+
+=over 4
+
+B<C<$append>>
+
+This string is placed directly after the C<input>.
+
+=back
+
+
+B<C<%field_strappings>>
 
 Optional. All strappings you want applied to the C<input>.
 
@@ -770,11 +824,11 @@ L<Bootstrap documentation|http://getbootstrap.com/css/#buttons>
 
 =head3 Syntax
 
-    %= button $button_text, $url[], %arguments
+    %= button $button_text(, $url[])(, %arguments)
 
     # %arguments
-    %html_attributes,
-    %strappings
+    (%html_attributes,)
+    (%strappings)
 
 B<C<$button_text>>
 
@@ -787,7 +841,7 @@ basically L<link_to|Mojolicious::Plugin::TagHelpers#link_to> with Bootstrap clas
 
 B<C<%arguments>>
 
-Optional hash.
+Optional hash:
 
 =over 4
 
@@ -822,13 +876,14 @@ With a url the button turns into a link.
 
 =head3 Syntax
 
-    %= table $title, %arguments, begin
+    %= table ($title,) (%arguments,) begin
            $body
     %  end
 
     # %arguments
-    %strappings
-    panel => $strappings{}
+    (%html_attributes,)
+    (%strappings,)
+    (panel => $strappings{})
 
 B<C<$title>>
 
@@ -840,13 +895,26 @@ Optional hash:
 
 =over 4
 
+B<C<%html_attributes>>
+
+Optional. A hash of html attributes you want applied to the table.
+
 B<C<%strappings>>
 
 Optional. A hash of the strappings to apply to the table.
 
+
 B<C<panel =E<gt> $strappings{}>>
 
-An optional key-value pair. $strappings{} is hash reference containing any strapping you want to set on the panel.
+An optional key-value pair:
+
+=over 4
+
+B<C<$strappings{}>>
+
+A hash reference containing any strapping you want to set on the panel.
+
+=back
 
 =back
 
@@ -875,7 +943,7 @@ A basic table.
 
 Several classes applied to the table.
 
-    %= table 'Heading Table 4', panel => { success }, condensed, begin
+    %= table 'Heading Table 4', panel => { success }, condensed, id => 'the-table', begin
         <tr><td>Table 4</td></tr>
     %  end
 
@@ -888,7 +956,7 @@ Several classes applied to the table.
         </table>
     </div>
 
-A C<condensed> table wrapped in a C<success> panel.
+A C<condensed> table with an C<id> wrapped in a C<success> panel.
 
 
 =head1 OPTIONS

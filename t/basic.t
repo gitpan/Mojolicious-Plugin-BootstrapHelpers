@@ -154,6 +154,11 @@ my @formgroups = (
             </div>
         </div>
     },
+    q{
+        <div class="form-group">
+            <input class="form-control" id="test-text-9" name="test_text_9" type="text" />
+        </div>
+    },
 );
 test($test, 'formgroup', @formgroups);
 
@@ -198,7 +203,7 @@ my @tables = (
             <div class="panel-heading">
                 <h3 class="panel-title">Heading Table 4</h3>
             </div>
-            <table class="table table-condensed">
+            <table class="table table-condensed" id="the-table">
                 <tr><td>Table 4</td></tr>
             </table>
         </div>
@@ -291,6 +296,9 @@ __DATA__
 @@ formgroup_8.html.ep
 %= formgroup 'Text test 8', text_field => ['test_text'], cols => { medium => [2, 10], small => [4, 8] }
 
+@@ formgroup_9.html.ep
+%= formgroup text_field => ['test-text-9']
+
 
 @@ button_1.html.ep
 %= button 'The example 1' => ['http://www.example.com/'], small
@@ -335,7 +343,7 @@ __DATA__
 %  end
 
 @@ table_4.html.ep
-%= table 'Heading Table 4', panel => { success }, condensed, begin
+%= table 'Heading Table 4', panel => { success }, condensed, id => 'the-table', begin
     <tr><td>Table 4</td></tr>
 %  end
 

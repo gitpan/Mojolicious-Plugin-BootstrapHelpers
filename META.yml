@@ -3,6 +3,7 @@ abstract: 'Type less bootstrap'
 author:
   - 'Erik Carlsson <csson@cpan.org>'
 build_requires:
+  Test::Mojo::Trim: '0.03'
   Test::More: '0.96'
 configure_requires:
   Module::Build::Tiny: '0.036'
@@ -28,8 +29,9 @@ requires:
   String::Trim: '0.004'
   experimental: '0.008'
   perl: '5.020000'
+  'true': '0.18'
 resources:
   bugtracker: https://github.com/Csson/p5-mojolicious-plugin-bootstraphelpers/issues
   homepage: https://github.com/Csson/p5-mojolicious-plugin-bootstraphelpers
   repository: https://github.com/Csson/p5-mojolicious-plugin-bootstraphelpers.git
-version: '0.008'
+version: '0.009'

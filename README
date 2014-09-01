@@ -55,8 +55,8 @@ DESCRIPTION
         # or (if you want to use the theme)
         %= bootstrap 'theme'
 
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
 
         # And the javascript
         %= bootstrap 'js'
@@ -123,21 +123,21 @@ DESCRIPTION
   Syntax convention
     In the syntax sections below the following conventions are used:
 
-        name      A specific string
-        $name     Any string
-        $name[]   An array reference  (ordering significant)
-        %name     A hash              (ordering not significant)
-        $name{}   A hash reference    (ordering not significant)
+        name        A specific string
+        $name       Any string
+        $name[]     An array reference  (ordering significant)
+        %name       A hash              (ordering not significant)
+        $name{}     A hash reference    (ordering not significant)
+        (optional)  Anything inside parenthesis is optional
 
+HELPERS
   Panels
     Bootstrap documentation <http://getbootstrap.com/components/#panels>
 
    Syntax
-        %= panel
-
-        %= panel $title, %strappings, begin
+        %= panel ($title, ((%strappings,) begin
             $body
-        %  end
+        %  end))
 
     $title
 
@@ -146,7 +146,7 @@ DESCRIPTION
 
     %strappings
 
-    Optional hash. Any strapping you want applied to the "panel".
+    Optional. Any strapping you want applied to the "panel".
 
     $body
 
@@ -217,48 +217,62 @@ DESCRIPTION
     Bootstrap documentation <http://getbootstrap.com/css/#forms>
 
    Syntax
-        %= formgroup $labeltext, %arguments
+        %= formgroup ($labeltext,) %arguments
 
         %= formgroup %arguments, begin
             $labeltext
         %  end
 
         # %arguments:
-        cols => { $size => [ $label_columns, $input_columns ], ... },
-        %strappings
+        (cols => $size_definitions{})
+        (%group_strappings)
         $fieldtype => $field_setting[],
     
         # $field_setting[]
         $name,
-        $value,
-        %field_arguments
+        ($value,)
+        (%field_arguments)
+    
+        # $size_definitions{}
+        { $size => [ $label_columns, $input_columns ](, ...) },
 
         # %field_arguments
-        %html_attributes,
-        %prepend,
-        %append,
-        %strappings
+        (%html_attributes,)
+        (prepend => $to_prepend,)
+        (append => $to_append,)
+        (%field_strappings)
 
     $labeltext
 
-    Mandatory. It is either the first argument, or placed in the body.
+    Optional. It is either the first argument, or placed in the body. It
+    creates a "label" element before the "input".
 
     %arguments
 
-    Mandatory. A hash:
+    Mandatory:
 
-        "cols"
+        "cols => $size_definitions{}"
 
-        Optional hash reference. It is only used when the "form" is a
-        ".form-horizontal". $size is one of "xsmall", "small", "medium", or
-        "large". $size takes a two item array reference: $label_columns is
-        the number of columns that should be used by the label for that
-        size, and $input_columns is the number of columns used for the input
-        field for that size.
+        Optional key-value pair. It is only used when the "form" is a
+        ".form-horizontal". You can define the widths for one or more or all
+        of the sizes.
 
-        You can defined the widths for one or more or all of the sizes.
+            $size
 
-        %strappings
+            Mandatory. It is one of "xsmall", "small", "medium", or "large".
+            $size takes a two item array reference:
+
+                $label_columns
+
+                Mandatory. The number of columns that should be used by the
+                label for that size.
+
+                $input_columns
+
+                Mandatory. The number of columns used for the input field
+                for that size.
+
+        %group_strappings
 
         Optional hash. One or more strappings you want applied to the
         ".form-group" element.
@@ -298,13 +312,25 @@ DESCRIPTION
                 Optional. All html attributes you want to set on the
                 "input".
 
-                %prepend and %append
+                "prepend => $to_prepend"
 
-                Optional. Can be used individually or together. They are
+                Optional key-value pair. Can be used with "append". They are
                 used to create input groups
                 <http://getbootstrap.com/components/#input-groups>.
 
-                %strappings
+                    $prepend
+
+                    This string is placed directly in front of the "input".
+
+                "append => $to_append"
+
+                Optional key-value pair. Can be used with "prepend".
+
+                    $append
+
+                    This string is placed directly after the "input".
+
+                %field_strappings
 
                 Optional. All strappings you want applied to the "input".
 
@@ -390,11 +416,11 @@ DESCRIPTION
     Bootstrap documentation <http://getbootstrap.com/css/#buttons>
 
    Syntax
-        %= button $button_text, $url[], %arguments
+        %= button $button_text(, $url[])(, %arguments)
 
         # %arguments
-        %html_attributes,
-        %strappings
+        (%html_attributes,)
+        (%strappings)
 
     $button_text
 
@@ -407,7 +433,7 @@ DESCRIPTION
 
     %arguments
 
-    Optional hash.
+    Optional hash:
 
         %html_attributes
 
@@ -433,13 +459,14 @@ DESCRIPTION
 
   Tables
    Syntax
-        %= table $title, %arguments, begin
+        %= table ($title,) (%arguments,) begin
                $body
         %  end
 
         # %arguments
-        %strappings
-        panel => $strappings{}
+        (%html_attributes,)
+        (%strappings,)
+        (panel => $strappings{})
 
     $title
 
@@ -450,14 +477,22 @@ DESCRIPTION
 
     Optional hash:
 
+        %html_attributes
+
+        Optional. A hash of html attributes you want applied to the table.
+
         %strappings
 
         Optional. A hash of the strappings to apply to the table.
 
         "panel => $strappings{}"
 
-        An optional key-value pair. $strappings{} is hash reference
-        containing any strapping you want to set on the panel.
+        An optional key-value pair:
+
+            $strappings{}
+
+            A hash reference containing any strapping you want to set on the
+            panel.
 
    Examples
     Bootstrap documentation <http://getbootstrap.com/css/#tables>
@@ -482,7 +517,7 @@ DESCRIPTION
 
     Several classes applied to the table.
 
-        %= table 'Heading Table 4', panel => { success }, condensed, begin
+        %= table 'Heading Table 4', panel => { success }, condensed, id => 'the-table', begin
             <tr><td>Table 4</td></tr>
         %  end
 
@@ -495,7 +530,7 @@ DESCRIPTION
             </table>
         </div>
 
-    A "condensed" table wrapped in a "success" panel.
+    A "condensed" table with an "id" wrapped in a "success" panel.
 
 OPTIONS
     Some options are available:
