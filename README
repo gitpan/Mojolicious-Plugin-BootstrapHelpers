@@ -84,18 +84,25 @@ DESCRIPTION
         <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
         <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
-  Shortcuts
-    There are several shortcuts for context and size classes, that
-    automatically expands to the correct class depending on which tag it is
-    applied to. They can be seen as a hash key and value merged into one.
+  Strappings
+    There are several shortcuts ("strappings") for applying context and size
+    classes that automatically expands to the correct class depending on
+    which tag it is applied to. For instance, if you apply the "info"
+    strapping to a panel, it becomes "panel-info", but when applied to a
+    button it becomes "btn-info".
 
-    For instance, if you apply the "info" shortcut to a panel, it becomes
-    "panel-info", but when applied to a button it becomes "btn-info".
+    You can use them in two different ways, but internally they are the
+    same. These to lines are exactly identical:
+
+        %= button 'Push me', primary
+
+        %= button 'Push me', __primary => 1
 
     For sizes, you can only use the longform ("xsmall", "small", "medium"
-    and "large"), they are shortened to the Bootstrap type classes.
+    and "large") no matter if you use the short strapping form or not. They
+    are shortened to the Bootstrap type classes.
 
-    The following shortcuts are available:
+    The following strappings are available:
 
        xsmall    default     striped
        small     primary     bordered
@@ -104,12 +111,23 @@ DESCRIPTION
                  warning     responsive
                  danger
 
-    See below for usage. Important: You can't follow a shortcut with a fat
-    comma ("=>"). The fat comma auto-quotes the shortcut, and then the
-    shortcut is not a shortcut anymore.
+    Add two leading underscores if you don't want to use the short form.
 
-    If there is no corresponding class for the element you add the shortcut
+    See below for usage. Important: You can't follow a short form strapping
+    with a fat comma ("=>"). The fat comma auto-quotes the strapping, and
+    then it breaks.
+
+    If there is no corresponding class for the element you add the strapping
     to it is silently not applied.
+
+  Syntax convention
+    In the syntax sections below the following conventions are used:
+
+        name      A specific string
+        $name     Any string
+        $name[]   An array reference  (ordering significant)
+        %name     A hash              (ordering not significant)
+        $name{}   A hash reference    (ordering not significant)
 
   Panels
     Bootstrap documentation <http://getbootstrap.com/components/#panels>
@@ -117,7 +135,7 @@ DESCRIPTION
    Syntax
         %= panel
 
-        %= panel $title, @shortcuts, begin
+        %= panel $title, %strappings, begin
             $body
         %  end
 
@@ -126,9 +144,9 @@ DESCRIPTION
     Usually mandatory, but can be omitted if there are no other arguments to
     the "panel". Otherwise, if you don't want a title, set it "undef".
 
-    @shortcuts
+    %strappings
 
-    Optional hash. Any shortcuts you want applied to the "panel".
+    Optional hash. Any strapping you want applied to the "panel".
 
     $body
 
@@ -136,7 +154,8 @@ DESCRIPTION
     "panel".
 
    Examples
-   No body, no title
+    No body, no title
+
         %= panel
 
         <div class="panel panel-default">
@@ -146,7 +165,8 @@ DESCRIPTION
 
     The class is set to "panel-default", by default.
 
-   Body, no title
+    Body, no title
+
         %= panel undef ,=> begin
             <p>A short text.</p>
         %  end
@@ -161,7 +181,8 @@ DESCRIPTION
     you can't use a regular fat comma since that would turn undef into a
     string. A normal comma is of course also ok.
 
-   Body and title
+    Body and title
+
         %= panel 'The header' => begin
             <p>A short text.</p>
         %  end
@@ -175,7 +196,8 @@ DESCRIPTION
             </div>
         </div>
 
-   Body and title, with context
+    Body and title, with context
+
         %= panel 'Panel 5', success, begin
             <p>A short text.</p>
         %  end
@@ -189,7 +211,7 @@ DESCRIPTION
             </div>
         </div>
 
-    The first shortcut, "success". This applies ".panel-success".
+    Here, the "success" strapping applies ".panel-success" to the panel.
 
   Form groups
     Bootstrap documentation <http://getbootstrap.com/css/#forms>
@@ -203,7 +225,7 @@ DESCRIPTION
 
         # %arguments:
         cols => { $size => [ $label_columns, $input_columns ], ... },
-        @shortcuts
+        %strappings
         $fieldtype => $field_setting[],
     
         # $field_setting[]
@@ -215,7 +237,7 @@ DESCRIPTION
         %html_attributes,
         %prepend,
         %append,
-        @shortcuts
+        %strappings
 
     $labeltext
 
@@ -236,9 +258,9 @@ DESCRIPTION
 
         You can defined the widths for one or more or all of the sizes.
 
-        @shortcuts
+        %strappings
 
-        Optional. One or more shortcuts that you want applied to the
+        Optional hash. One or more strappings you want applied to the
         ".form-group" element.
 
         $fieldtype
@@ -282,12 +304,13 @@ DESCRIPTION
                 used to create input groups
                 <http://getbootstrap.com/components/#input-groups>.
 
-                @shortcuts
+                %strappings
 
-                Optional. All shortcuts you want applied to the "input".
+                Optional. All strappings you want applied to the "input".
 
    Examples
-   Basic form group
+    Basic form group
+
         %= formgroup 'Text test 1', text_field => ['test_text']
 
         <div class="form-group">
@@ -298,7 +321,8 @@ DESCRIPTION
     The first item in the array ref is used for both "id" and "name".
     Except...
 
-   Input group (before), and large input field
+    Input group (before), and large input field
+
         %= formgroup 'Text test 4', text_field => ['test-text', append => '.00', large]
 
         <div class="form-group">
@@ -309,13 +333,14 @@ DESCRIPTION
             </div>
         </div>
 
-    Shortcuts can also be used in this context. Here "large" applies
+    Strappings can also be used in this context. Here "large" applies
     ".input-lg".
 
     If the input name (the first item in the text_field array ref) contains
     dashes, those are replaced (in the "name") to underscores.
 
-   Input group (before and after), and with value
+    Input group (before and after), and with value
+
         %= formgroup 'Text test 5', text_field => ['test_text', '200', prepend => '$', append => '.00']
 
         <div class="form-group">
@@ -327,10 +352,11 @@ DESCRIPTION
             </div>
         </div>
 
-    The (optional) second item in the array ref is the value, if any, that
-    should populate the input tag.
+    Here, the second item in the "text_field" array reference is a value
+    that populates the "input".
 
-   Large input group
+    Large input group
+
         %= formgroup 'Text test 6', text_field => ['test_text'], large
 
         <div class="form-group form-group-lg">
@@ -339,10 +365,11 @@ DESCRIPTION
         </div>
 
     Note the difference with the earlier example. Here "large" is outside
-    the "text_field" array ref, and therefore ".form-group-lg" is applied to
-    the form group.
+    the "text_field" array reference, and therefore ".form-group-lg" is
+    applied to the form group.
 
-   Horizontal form groups
+    Horizontal form groups
+
         %= formgroup 'Text test 8', text_field => ['test_text'], cols => { medium => [2, 10], small => [4, 8] }
 
         <div class="form-group">
@@ -356,27 +383,83 @@ DESCRIPTION
     the "cols" attribute. The first item in each array ref is for the label,
     and the second for the input.
 
-    (Note that in this context, "medium" and "large" are not shortcuts.
-    Shortcuts don't take arguments.)
+    (Note that in this context, "medium" and "large" are not short form
+    strappings. Those don't take arguments.)
 
   Buttons
     Bootstrap documentation <http://getbootstrap.com/css/#buttons>
 
+   Syntax
+        %= button $button_text, $url[], %arguments
+
+        # %arguments
+        %html_attributes,
+        %strappings
+
+    $button_text
+
+    Mandatory. The text on the button.
+
+    $url[]
+
+    Optional array reference. It is handed off to url_for, so with it this
+    is basically link_to with Bootstrap classes.
+
+    %arguments
+
+    Optional hash.
+
+        %html_attributes
+
+        Optional hash of any html attributes you want to set on the
+        button/link.
+
+        %strappings
+
+        Optional hash. Any strappings you want to set on the button/link.
+
+   Examples
         %= button 'The example 5' => large, warning
 
         <button class="btn btn-lg btn-warning">The example 5</button>
 
-    An ordinary button, with applied shortcuts.
+    An ordinary button, with applied strappings.
 
         %= button 'The example 1' => ['http://www.example.com/'], small
 
         <a class="btn btn-sm" href="http://www.example.com/">The example 1</a>
 
-    If the first argument after the button text is an array ref, it is used
-    to populate "href" and turns the button into a link. The url is handed
-    off url_for, so this is basically link_to with Bootstrap classes.
+    With a url the button turns into a link.
 
   Tables
+   Syntax
+        %= table $title, %arguments, begin
+               $body
+        %  end
+
+        # %arguments
+        %strappings
+        panel => $strappings{}
+
+    $title
+
+    Optional. If set the table will be wrapped in a panel. The table
+    replaces the body.
+
+    %arguments
+
+    Optional hash:
+
+        %strappings
+
+        Optional. A hash of the strappings to apply to the table.
+
+        "panel => $strappings{}"
+
+        An optional key-value pair. $strappings{} is hash reference
+        containing any strapping you want to set on the panel.
+
+   Examples
     Bootstrap documentation <http://getbootstrap.com/css/#tables>
 
         <%= table begin %>
@@ -399,13 +482,28 @@ DESCRIPTION
 
     Several classes applied to the table.
 
+        %= table 'Heading Table 4', panel => { success }, condensed, begin
+            <tr><td>Table 4</td></tr>
+        %  end
+
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <h3 class="panel-title">Heading Table 4</h3>
+            </div>
+            <table class="table table-condensed">
+                <tr><td>Table 4</td></tr>
+            </table>
+        </div>
+
+    A "condensed" table wrapped in a "success" panel.
+
 OPTIONS
     Some options are available:
 
         $app->plugin('BootstrapHelpers', {
             tag_prefix => 'bs',
-            shortcut_prefix => 'set',
-            init_shortcuts => 1,
+            short_strappings_prefix => 'set',
+            init_short_strappings => 1,
         });
 
   tag_prefix
@@ -424,23 +522,24 @@ OPTIONS
         followed by "_". If you set "tag_prefix => 'bs'", then "panel" is
         now used as "bs_panel".
 
-  shortcut_prefix
+  short_strappings_prefix
     Default: "undef"
 
-    This is similar to "tag_prefix", but is instead applied to the
-    shortcuts. The same rules applies.
+    This is similar to "tag_prefix", but is instead applied to the short
+    form strappings. The same rules applies.
 
-  init_shortcuts
+  init_short_strappings
     Default: 1
 
-    If you don't want the shortcuts setup at all, set this option to a
-    defined but false value.
+    If you don't want the short form of strappings setup at all, set this
+    option to a defined but false value.
 
     All functionality is available, but instead of "warning" you must now
-    use "__warning => 1". That is why they are called shortcuts.
+    use "<__warning =" 1>>.
 
-    With shortcuts turned off, sizes are only supported in longform:
-    "__xsmall", "__small", "__medium" and "__large".
+    With short form turned off, sizes are still only supported in long form:
+    "__xsmall", "__small", "__medium" and "__large". The Bootstrap
+    abbreviations ("xs" - "lg") are not used.
 
 AUTHOR
     Erik Carlsson <csson@cpan.org>
