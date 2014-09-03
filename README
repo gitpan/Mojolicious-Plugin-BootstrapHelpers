@@ -227,14 +227,14 @@ HELPERS
         (cols => $size_definitions{})
         (%group_strappings)
         $fieldtype => $field_setting[],
-    
+
+        # $size_definitions{}
+        { $size => [ $label_columns, $input_columns ](, ...) },
+
         # $field_setting[]
         $name,
         ($value,)
         (%field_arguments)
-    
-        # $size_definitions{}
-        { $size => [ $label_columns, $input_columns ](, ...) },
 
         # %field_arguments
         (%html_attributes,)
@@ -318,7 +318,7 @@ HELPERS
                 used to create input groups
                 <http://getbootstrap.com/components/#input-groups>.
 
-                    $prepend
+                    $to_prepend
 
                     This string is placed directly in front of the "input".
 
@@ -326,7 +326,7 @@ HELPERS
 
                 Optional key-value pair. Can be used with "prepend".
 
-                    $append
+                    $to_append
 
                     This string is placed directly after the "input".
 
@@ -473,6 +473,10 @@ HELPERS
     Optional. If set the table will be wrapped in a panel. The table
     replaces the body.
 
+    $body
+
+    Mandatory. "thead", "td" and so on.
+
     %arguments
 
     Optional hash:
@@ -525,12 +529,41 @@ HELPERS
             <div class="panel-heading">
                 <h3 class="panel-title">Heading Table 4</h3>
             </div>
-            <table class="table table-condensed">
+            <table class="table table-condensed" id="the-table">
                 <tr><td>Table 4</td></tr>
             </table>
         </div>
 
     A "condensed" table with an "id" wrapped in a "success" panel.
+
+  Badges
+   Syntax
+        %= badge $text, [ %attr [, right] ]
+
+    $text
+
+    Mandatory. If it is "undef" no output is produced.
+
+    %attr
+
+    Optional. Any html attributes to apply on the badge.
+
+    "right"
+
+    Optional. The only strapping available.
+
+   Examples
+        <%= badge '3' %>
+
+        <span class="badge">3</span></a>
+
+    A basic badge.
+
+        <%= badge '4', data => { custom => 'yes' }, right %>
+    
+        <span class="badge pull-right" data-custom="yes">4</span>
+
+    A right aligned badge with a data attribute.
 
 OPTIONS
     Some options are available:

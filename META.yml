@@ -6,9 +6,9 @@ build_requires:
   Test::Mojo::Trim: '0.03'
   Test::More: '0.96'
 configure_requires:
-  Module::Build::Tiny: '0.036'
+  Module::Build::Tiny: '0.037'
 dynamic_config: 0
-generated_by: 'Dist::Milla version v1.0.5, Dist::Zilla version 5.019, CPAN::Meta::Converter version 2.140640'
+generated_by: 'Dist::Milla version v1.0.5, Dist::Zilla version 5.020, CPAN::Meta::Converter version 2.140640'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -34,4 +34,4 @@ resources:
   bugtracker: https://github.com/Csson/p5-mojolicious-plugin-bootstraphelpers/issues
   homepage: https://github.com/Csson/p5-mojolicious-plugin-bootstraphelpers
   repository: https://github.com/Csson/p5-mojolicious-plugin-bootstraphelpers.git
-version: '0.009'
+version: '0.010'
