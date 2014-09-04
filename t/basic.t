@@ -9,7 +9,12 @@ use Test::More;
 use Mojolicious::Lite;
 use Test::Mojo::Trim;
 
-plugin 'BootstrapHelpers';
+plugin 'BootstrapHelpers', {
+    icons => { 
+        class => 'glyphicon',
+        formatter => 'glyphicon-%s',
+    },
+};
 
 my $test = Test::Mojo::Trim->new;
 
@@ -164,13 +169,13 @@ test($test, 'formgroup', @formgroups);
 
 
 my @buttons = (
-    q{<a class="btn btn-sm" href="http://www.example.com/">The example 1</a>},
-    q{<a class="btn" href="/button_2">The example 2</a>},
-    q{<a class="btn" href="/panel_1">The example 3</a>},
-    q{<button class="btn">The example 4</button>},
+    q{<a class="btn btn-default btn-sm" href="http://www.example.com/">The example 1</a>},
+    q{<a class="btn btn-default" href="/button_2">The example 2</a>},
+    q{<a class="btn btn-default" href="/panel_1">The example 3</a>},
+    q{<button class="btn btn-default">The example 4</button>},
     q{<button class="btn btn-lg btn-warning">The example 5</button>},
-    q{<a class="btn" href="/button_6"> The Example 6 </a>},
-    q{<button class="btn" type="submit">Save 1</button>},
+    q{<a class="btn btn-default" href="/button_6"> The Example 6 </a>},
+    q{<button class="btn btn-default" type="submit">Save 1</button>},
     q{<button class="btn btn-primary" type="submit">Save 2</button>},
 );
 
@@ -230,6 +235,44 @@ my @badges = (
 );
 
 test($test, 'badge', @badges);
+
+my @icons = (
+    q{<span class="glyphicon glyphicon-copyright-mark"></span>},
+    q{<span class="glyphicon glyphicon-sort-by-attributes-alt"></span>},
+);
+
+test($test, 'icon', @icons);
+
+
+my @dropdowns = (
+    q{
+        <div class="dropdown">
+            <button class="btn btn-default dropdown-toggle" type="button" id="a_custom_id" data-toggle="dropdown">Dropdown 1</button>
+            <ul class="dropdown-menu">
+                <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
+                <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
+                <li class="divider"></li>
+                <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>
+            </ul>
+        </div>
+    },
+    q{
+        <div class="dropdown">
+            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Dropdown 2<span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="menuitem" href="item1" tabindex="-1" data-attr="2">Item 1</a></li>
+                <li><a class="menuitem" href="item2" tabindex="-1" data-attr="4">Item 2</a></li>
+                <li class="divider"></li>
+                <li><a class="menuitem" href="item3" tabindex="-1" data-attr="7">Item 3</a></li>
+                <li class="divider"></li>
+                <li><a class="menuitem" href="item4" tabindex="4">Item 4</a></li>
+            </ul>
+        </div>
+    },
+);
+
+test($test, 'dropdown', @dropdowns);
 
 done_testing();
 
@@ -344,11 +387,10 @@ __DATA__
 @@ button_8.html.ep
 %= submit_button 'Save 2', primary
 
-
 @@ button_group_1.html.ep
 <%= button_group justified,
     contents => [
-        button => ['Button Group 1', ['http://www.example.com/'], medium],
+        button => ['Button Group 1', ['#'], medium],
         button => ['Button Group 1 button 2', dropdown],
 
     ],
@@ -389,3 +431,33 @@ __DATA__
 
 @@ badge_4.html.ep
 <%= badge 'Badge 4', data => { custom => 'yes' }, right %>
+
+
+@@ icon_1.html.ep
+<%= icon 'copyright-mark' %>
+
+@@ icon_2.html.ep
+%= icon 'sort-by-attributes-alt'
+
+
+@@ dropdown_1.html.ep
+<%= dropdown 'Dropdown 1',
+             button => [id => 'a_custom_id'],
+             items => [
+                ['Item 1', ['item1'] ],
+                ['Item 2', ['item2'] ],
+                divider,
+                ['Item 3', ['item3'] ]
+             ] %>
+
+@@ dropdown_2.html.ep
+<%= dropdown 'Dropdown 2', caret,
+             items => [
+                ['Item 1', ['item1'], data => { attr => 2 } ],
+                ['Item 2', ['item2'], data => { attr => 4 } ],
+                divider,
+                ['Item 3', ['item3'], data => { attr => 7 } ],
+                divider,
+                ['Item 4', ['item4'], tabindex => 4 ],
+             ] %>
+

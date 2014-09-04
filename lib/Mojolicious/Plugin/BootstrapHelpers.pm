@@ -9,363 +9,11 @@ package Mojolicious::Plugin::BootstrapHelpers {
     use Mojo::Util 'xml_escape';
     use Scalar::Util 'blessed';
     use String::Trim;
+    use Mojolicious::Plugin::BootstrapHelpers::Helpers;
 
     use experimental 'postderef'; # requires 5.20
 
-    our $VERSION = 0.010;
-
-    sub bootstraps_bootstraps {
-        my $c = shift;
-        my $arg = shift;
-
-        my $css   = q{<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">};
-        my $theme = q{<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">};
-        my $js    = q{<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>};
-        my $jq    = q{<script src="//code.jquery.com/jquery-2.1.1.min.js"></script>};
-
-        return out(
-              !defined $arg  ? $css
-            : $arg eq 'css'  ? $css . $theme
-            : $arg eq 'js'   ? $js
-            : $arg eq 'jsq'  ? $jq . $js
-            : $arg eq 'all'  ? $css . $theme . $js
-            : $arg eq 'allq' ? $css . $theme . $jq . $js
-            :                 ''
-        );
-    }
-
-    sub bootstrap_panel {
-        my($c, $title, $callback, $content, $attr) = parse_call(@_);
-        
-        $attr = add_classes($attr, 'panel', { panel => 'panel-%s', panel_default => 'default'});
-        
-        my $body = qq{
-                <div class="panel-body">
-                    } . contents($callback, $content) . qq{
-                </div>
-        };
-
-        return create_panel($title, $body, $attr);
-
-    }
-
-    sub create_panel {
-        my $title = shift;
-        my $body = shift;
-        my $attr = shift;
-        
-        my $tag = qq{
-            <div class="$attr->{'class'}">
-            } . (defined $title ? qq{
-                <div class="panel-heading">
-                    <h3 class="panel-title">$title</h3>
-                </div>
-            } : '') . qq{
-                $body
-            </div>
-        };
-
-        return out($tag);
-    }
-
-    sub bootstrap_table {
-        my $c = shift;
-        my $callback = ref $_[-1] eq 'CODE' ? pop : undef;
-        my $title = scalar @_ % 2 ? shift : undef;
-        my $attr = parse_attributes(@_);
-        
-        $attr = add_classes($attr, 'table', { table => 'table-%s' });
-        my $html = htmlify_attrs($attr);
-
-        my $table = qq{
-            <table class="$attr->{'class'}"$html>
-            } . $callback->() . qq{
-            </table>
-        };
-
-        if(defined $title) {
-            $attr->{'panel'} = add_classes($attr->{'panel'}, 'panel', { panel => 'panel-%s', panel_default => 'default'});
-        }
-
-
-        return defined $title ? create_panel($title, $table, $attr->{'panel'}) : out($table);
-    }
-
-    sub htmlify_attrs {
-        my $attr = shift;
-        return '' if !defined $attr;
-        $attr = cleanup_attrs({$attr->%*}); #* Make a copy
-
-        my $html = join ' ' => map { qq{$_="$attr->{ $_ }"} } sort keys $attr->%*;
-        return ' ' . $html if defined $html;
-        return '';
-    }
-
-    sub bootstrap_formgroup {
-        my $c = shift;
-        my $title = ref $_[-1] eq 'CODE' ? pop 
-                  : scalar @_ % 2        ? shift
-                  :                        undef;
-        my $attr = parse_attributes(@_);
-        
-        $attr->{'column_information'} = delete $attr->{'cols'} if ref $attr->{'cols'} eq 'HASH';
-
-        my($id, $input) = fix_input($c, $attr);
-        my $label = defined $title ? fix_label($c, $id, $title, $attr) : '';
-
-        $attr = add_classes($attr, 'form-group', { size => 'form-group-%s'});
-        $attr = cleanup_attrs($attr);
-
-
-        my $tag = qq{
-            <div class="$attr->{'class'}">
-                $label
-                $input
-            </div>
-        };
-
-        return out($tag);
-    }
-
-    sub bootstrap_button {
-        my $c = shift;
-        my $content = ref $_[-1] eq 'CODE' ? pop : shift;
-
-        my @url = shift->@* if ref $_[0] eq 'ARRAY';
-        my $attr = { @_ };
-        
-        $attr = add_classes($attr, 'btn', { size => 'btn-%s', button => 'btn-%s' });
-        $attr = cleanup_attrs($attr);
-
-        # We have an url
-        if(scalar @url) {
-            $attr->{'href'} = $c->url_for(@url)->to_string;
-            return out(Mojolicious::Plugin::TagHelpers::_tag('a', $attr->%*, $content));
-        }
-        else {
-            return out(Mojolicious::Plugin::TagHelpers::_tag('button', $attr->%*, $content));
-        }
-
-    }
-
-    sub bootstrap_submit {
-        push @_ => (type => 'submit');
-        return bootstrap_button(@_);
-    }
-
-
-    sub bootstrap_badge {
-        my $c = shift;
-        my $content = iscoderef($_[-1]) ? pop : shift;
-        my $attr = parse_attributes(@_);
-
-        $attr = add_classes($attr, 'badge', { direction => 'pull-%s' });
-        $attr = cleanup_attrs($attr);
-        my $html = htmlify_attrs($attr);
-
-        my $badge = defined $content && length $content ? qq{<span$html>$content</span>} : '';
-
-        return out($badge);
-    }
-
-    sub iscoderef {
-        return shift eq 'CODE';
-    }
-
-    sub fix_input {
-        my $c = shift;
-        my $attr = shift;
-        
-        my $tagname = (grep { exists $attr->{"${_}_field"} } qw/date datetime month time week color email number range search tel text url password/)[0];
-        my $info = $attr->{"${tagname}_field"};
-        my $id = shift $info->@*;
-        
-        # if odd number of elements, the first one is the value (shortcut to avoid having to: value => 'value')
-        if($info->@* % 2) {
-            push $info->@* => (value => shift $info->@*);
-        }
-        my $tag_attr = { $info->@* };
-
-        my @column_classes = get_column_classes($attr->{'column_information'}, 1);
-        $tag_attr = add_classes($tag_attr, 'form-control', { size => 'input-%s' });
-        $tag_attr->{'id'} //= $id;
-        my $name_attr = $id =~ s{-}{_}rg;
-
-        my $prepend = delete $tag_attr->{'prepend'};
-        my $append = delete $tag_attr->{'append'};
-        $tag_attr = cleanup_attrs($tag_attr);
-
-        my $horizontal_before = scalar @column_classes ? qq{<div class="} . (trim join ' ' => @column_classes) . '">' : '';
-        my $horizontal_after = scalar @column_classes ? '</div>' : '';
-        my $input = Mojolicious::Plugin::TagHelpers::_input($c, $name_attr, $tag_attr->%*, type => $tagname);
-
-        # input group not requested
-        if(!defined $prepend && !defined $append) {
-            return ($id => $horizontal_before . $input . $horizontal_after);
-        }
-
-        return $id => qq{
-            $horizontal_before
-            <div class="input-group">
-                } . ($prepend ? qq{<span class="input-group-addon">$prepend</span>} : '') . qq{
-                $input
-                } . ($append ? qq{<span class="input-group-addon">$append</span>} : '') . qq{
-            </div>
-            $horizontal_after
-        };
-
-    }
-
-    sub fix_label {
-        my $c = shift;
-        my $for = shift;
-        my $title = shift;
-        my $attr = shift;
-
-        my @column_classes = get_column_classes($attr->{'column_information'}, 0);
-        my @args = (class => trim join ' ' => ('control-label', @column_classes));
-        ref $title eq 'CODE' ? push @args => $title : unshift @args => $title;
-
-        return Mojolicious::Plugin::TagHelpers::_label_for($c, $for, @args);
-    }
-
-    sub parse_call {
-        my $c = shift;
-        my $title = shift;
-        my $callback = ref $_[-1] eq 'CODE' ? pop : undef;
-        my $content = scalar @_ % 2 ? pop : '';
-        my $attr = parse_attributes(@_);
-
-        return ($c, $title, $callback, $content, $attr);
-    }
-
-    sub parse_attributes {
-        my %attr = @_;
-        if($attr{'data'} && ref $attr{'data'} eq 'HASH') {
-            while(my($key, $value) = each %{ $attr{'data'} }) {
-                $key =~ tr/_/-/;
-                $attr{ lc("data-$key") } = $value;
-            }
-            delete $attr{'data'};
-        }
-        return \%attr;
-    }
-
-    sub get_column_classes {
-        my $attr = shift;
-        my $index = shift;
-
-        my @classes = ();
-        foreach my $key (keys $attr->%*) {
-            my $correct_name = get_size_for($key);
-            if(defined $correct_name) {
-                push @classes => sprintf "col-%s-%d" => $correct_name, $attr->{ $key }[ $index ];
-            }
-        }
-        return sort @classes;
-    }
-
-    sub add_classes {
-        my $attr = shift;
-        my $formatter = ref $_[-1] eq 'HASH' ? pop : undef;
-
-        no warnings 'uninitialized';
-
-        my @classes = ($attr->{'class'}, @_);
-
-        if($formatter) {
-            if(exists $formatter->{'size'}) {
-                push @classes => sprintfify_class($attr, $formatter->{'size'}, $formatter->{'size_default'}, _sizes());
-            }
-            if(exists $formatter->{'button'}) {
-                push @classes => sprintfify_class($attr, $formatter->{'button'}, $formatter->{'button_default'}, _button_contexts());
-            }
-            if(exists $formatter->{'panel'}) {
-                push @classes => sprintfify_class($attr, $formatter->{'panel'}, $formatter->{'panel_default'}, _panel_contexts());
-            }
-            if(exists $formatter->{'table'}) {
-                push @classes => sprintfify_class($attr, $formatter->{'table'}, $formatter->{'table_default'}, _table_contexts());
-            }
-            if(exists $formatter->{'direction'}) {
-                push @classes => sprintfify_class($attr, $formatter->{'direction'}, $formatter->{'direction_default'}, _direction_contexts());
-            }
-        }
-       
-        $attr->{'class'} = trim join ' ' => uniq sort @classes;
-
-        return $attr;
-        
-    }
-
-    sub sprintfify_class {
-        my $attr = shift;
-        my $format = shift;
-        my $possibilities = pop;
-        my $default = shift;
-
-        my @founds = (grep { exists $attr->{ $_ } } (keys $possibilities->%*));
-
-        return if !scalar @founds && !defined $default;
-        push @founds => $default if !scalar @founds;
-
-        return map { sprintf $format => $possibilities->{ $_ } } @founds;
-
-    }
-
-    sub contents {
-        my $callback = shift;
-        my $content = shift;
-
-        return defined $callback ? $callback->() : xml_escape($content);
-    }
-
-    sub cleanup_attrs {
-        my $hash = shift;
-        
-        map { delete $hash->{ $_ } } ('column_information',
-                                      'panel',
-                                      keys _sizes()->%*,
-                                      keys _button_contexts()->%*,
-                                      keys _panel_contexts()->%*,
-                                      keys _table_contexts()->%*,
-                                      keys _direction_contexts()->%*);
-        # delete all attributes starting with __
-        map { delete $hash->{ $_ } } grep { substr $_, 0 => 2 eq '__' } keys $hash->%*;
-        return $hash;
-    }
-
-    sub get_size_for {
-        my $input = shift;
-
-        return _sizes()->{ $input };
-    }
-
-    sub _sizes {
-        return {
-            __xsmall => 'xs', xsmall => 'xs', xs => 'xs',
-            __small  => 'sm', small  => 'sm', sm => 'sm',
-            __medium => 'md', medium => 'md', md => 'md',
-            __large  => 'lg', large  => 'lg', lg => 'lg',
-        }
-    }
-
-    sub _button_contexts {
-        return { map { ("__$_" => $_, $_ => $_) } qw/default primary success info warning danger link/ };
-    }
-    sub _panel_contexts {
-        return { map { ("__$_" => $_, $_ => $_) } qw/default primary success info warning danger/ };
-    }
-    sub _table_contexts {
-        return { map { ("__$_" => $_, $_ => $_) } qw/striped bordered hover condensed responsive/ };
-    }
-    sub _direction_contexts {
-        return { map { ("__$_" => $_, $_ => $_) } qw/right/ };
-    }
-
-    sub out {
-        my $tag = shift;
-        return Mojo::ByteStream->new($tag);
-    }
+    our $VERSION = '0.012';
 
     sub register {
         my $self = shift;
@@ -376,21 +24,28 @@ package Mojolicious::Plugin::BootstrapHelpers {
         my $ssp = setup_prefix($args->{'short_strappings_prefix'});
         my $init_short_strappings = $args->{'init_short_strappings'} //= 1;
 
-        $app->helper($tp.'bootstrap' => \&bootstraps_bootstraps);
-        $app->helper($tp.'table' => \&bootstrap_table);
-        $app->helper($tp.'panel' => \&bootstrap_panel);
-        $app->helper($tp.'formgroup' => \&bootstrap_formgroup);
-        $app->helper($tp.'button' => \&bootstrap_button);
-        $app->helper($tp.'submit_button' => \&bootstrap_submit);
-        $app->helper($tp.'badge' => \&bootstrap_badge);
+        $app->helper($tp.'bootstrap' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstraps_bootstraps);
+        $app->helper($tp.'table' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_table);
+        $app->helper($tp.'panel' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_panel);
+        $app->helper($tp.'formgroup' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_formgroup);
+        $app->helper($tp.'button' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_button);
+        $app->helper($tp.'submit_button' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_submit);
+        $app->helper($tp.'badge' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_badge);
+        $app->helper($tp.'dropdown' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_dropdown);
+        
+        if(exists $args->{'icons'}{'class'} && $args->{'icons'}{'formatter'}) {
+            $app->config->{'Plugin::BootstrapHelpers'} = $args;
+            $app->helper($tp.'icon' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_icon);
+        }
 
         if($init_short_strappings) {
             my @sizes = qw/xsmall small medium large/;
             my @contexts = qw/default primary success info warning danger/;
             my @table = qw/striped bordered hover condensed responsive/;
             my @direction = qw/right/;
+            my @menu = qw/caret divider/;
 
-            foreach my $helper (@sizes, @contexts, @table, @direction) {
+            foreach my $helper (@sizes, @contexts, @table, @direction, @menu) {
                $app->helper($ssp.$helper, sub { ("__$helper" => 1) });
             }
         }
@@ -516,8 +171,8 @@ They are shortened to the Bootstrap type classes.
 
 The following strappings are available:
 
-   xsmall    default     striped
-   small     primary     bordered
+   xsmall    default     striped       caret     right
+   small     primary     bordered      divider
    medium    success     hover
    large     info        condensed
              warning     responsive
@@ -571,15 +226,16 @@ The following applies to all C<%has> hashes below:
 
 =item * Depending on context either the leading or following comma is optional together with the hash. It is usually obvious.
 
-=item * Sometimes on nested helpers (such as tables in panels just below), C<%har> is the only thing that can be applied to 
+=item * Sometimes on nested helpers (such as tables in panels just below), C<%has> is the only thing that can be applied to 
         the other element. In this case C<panel =E<gt> { %panel_har }>. It follows from above that in those cases this entire
-        expression is I<also> optional. Such cases are also left out of syntax definitions.
+        expression is I<also> optional. Such cases are also not marked as optional in syntax definitions and are not mentioned 
+        in syntax description, unless they need further comment.
 
 =back
 
 From this definition:
 
-    %= table ($title,) %table_har, (panel => { %panel_har },) begin
+    %= table ($title,) %table_har, panel => { %panel_har }, begin
            $body
     %  end
 
@@ -605,7 +261,7 @@ L<Bootstrap documentation|http://getbootstrap.com/components/#panels>
 
 =head3 Syntax
 
-    %= panel ($title, %har, begin
+    %= panel ($title, %has, begin
         $body
     %  end)
 
@@ -687,12 +343,9 @@ L<Bootstrap documentation|http://getbootstrap.com/css/#forms>
     
     <%= formgroup ($labeltext,)
                    %formgroup_has,
-                  (cols => { $size => [ $label_columns, $input_columns ](, $other_size => [...](, ...)) },)
                    $fieldtype => [
                        $input_name,
                       ($input_value,)
-                      (prepend => $to_prepend,)
-                      (append  => $to_append,)
                        %input_has,
                   ]
 
@@ -706,28 +359,6 @@ L<Bootstrap documentation|http://getbootstrap.com/css/#forms>
 B<C<$labeltext>>
 
 Optional. It is either the first argument, or placed in the body. It creates a C<label> element before the C<input>.
-
-B<C<cols>>
-
-Optional. It is only used when the C<form> is a C<.form-horizontal>. You can define the widths for one or more or all of the sizes. See examples.
-
-=over 4
-
-B<C<$size>>
-
-Mandatory. It is one of C<xsmall>, C<small>, C<medium>, or C<large>. 
-C<$size> takes a two item array reference.
-
-B<C<$label_columns>>
-
-Mandatory. The number of columns that should be used by the label for that size.
-
-B<C<$input_columns>>
-
-Mandatory. The number of columns used for the input field for that size.
-
-=back
-
 
 B<C<$fieldtype>>
 
@@ -746,24 +377,6 @@ into underscores when setting the C<name>. If C<id> exists in C<%input_has> then
 B<C<$value>>
 
 Optional. If you prefer you can set C<value> in C<%input_has> instead. (But don't do both for the same field.)
-
-B<C<prepend =E<gt> $to_prepend>>
-
-B<C<append =E<gt> $to_append>>
-
-Optional key-value pairs. Can also be used together. They are used to create L<input groups|http://getbootstrap.com/components/#input-groups>.
-
-=over 4
- 
-B<C<$to_prepend>>
-
-This string is placed directly in front of the C<input>.
-
-B<C<$to_append>>
-
-This string is placed directly after the C<input>.
-
-=back
 
 =back
 
@@ -850,7 +463,9 @@ L<Bootstrap documentation|http://getbootstrap.com/css/#buttons>
 
 =head3 Syntax
 
-    %= button $button_text(, [$url]), %har
+    %= button $button_text(, [$url]), %has
+
+    %= submit_button $text, %has
 
 B<C<$button_text>>
 
@@ -860,6 +475,8 @@ B<C<[$url]>>
 
 Optional array reference. It is handed off to L<url_for|Mojolicious::Controller#url_for>, so with it this is
 basically L<link_to|Mojolicious::Plugin::TagHelpers#link_to> with Bootstrap classes.
+
+Not available for C<submit_button>.
 
 =head3 Examples
 
@@ -875,7 +492,11 @@ An ordinary button, with applied strappings.
 
 With a url the button turns into a link.
 
+    %= submit_button 'Save', __primary
 
+    <button class="btn btn-primary" type="submit">Save 2</button>
+
+A submit button for use in forms. It overrides the build-in submit_button helper.
 
 =head2 Tables
 
@@ -942,7 +563,7 @@ A C<condensed> table with an C<id> wrapped in a C<success> panel.
 
 =head3 Syntax
 
-    %= badge $text, %har
+    %= badge $text, %has
 
 B<C<$text>>
 
@@ -963,6 +584,128 @@ A basic badge.
 A right aligned badge with a data attribute.
 
 
+=head2 Icons
+
+This helper needs to be activated separately, see options below.
+
+=head3 Syntax
+
+    %= icon $icon_name
+
+B<C<$icon_name>>
+
+Mandatory. The specific icon you wish to create. Possible values depends on your icon pack.
+
+=head3 Examples
+    
+    <%= icon 'copyright-mark' %>
+    %= icon 'sort-by-attributes-alt'
+
+    <span class="glyphicon glyphicon-copyright-mark"></span>
+    <span class="glyphicon glyphicon-sort-by-attributes-alt"></span>
+
+
+=head2 Dropdowns
+
+=head3 Syntax
+    
+    <%= dropdown  $button_text,
+                 (caret,)
+                  %has,
+                 (button => [ %button_has ],)
+                  items  => [ 
+                      [ $itemtext, [ $url ], %item_has ],
+                     (divider,)
+                  ]
+
+Nesting is currently not supported.
+
+B<C<$button_text>>
+
+Mandatory. The text that appears on the menu opening button.
+
+B<C<caret>>
+
+It is a strapping. If it is used a caret (downward facing arrow) will be placed on the button.
+
+B<C<items>>
+
+Mandatory array reference. Here are the items that make up the menu. It takes two different types of value (both can occur any number of times:
+
+=over 4
+
+B<C<divider>>
+
+Creates a horizontal separator in the menu.
+
+B<C<[ $itemtext, [ $url ], %item_has ]>>
+
+This creates a linked menu item.
+
+=over 4
+
+B<C<$itemtext>>
+
+Mandatory. The text on the link.
+
+B<C<$url>>
+
+Mandatory. It sets the C<href> on the link. L<url_for|Mojolicious::Controller#url_for> is used to create the link.
+
+=back
+
+=back
+
+=head3 Examples
+
+    <%= dropdown 'Dropdown 1',
+                 button => [id => 'a_custom_id'],
+                 items => [
+                    ['Item 1', ['item1'] ],
+                    ['Item 2', ['item2'] ],
+                    divider,
+                    ['Item 3', ['item3'] ]
+                 ] %>
+
+    <div class="dropdown">
+        <button class="btn btn-default dropdown-toggle" type="button" id="a_custom_id" data-toggle="dropdown">Dropdown 1</button>
+        <ul class="dropdown-menu">
+            <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
+            <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
+            <li class="divider"></li>
+            <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>
+        </ul>
+    </div>
+
+By default, C<tabindex> is set to C<-1>...
+
+    <%= dropdown 'Dropdown 2', caret,
+                 items => [
+                    ['Item 1', ['item1'], data => { attr => 2 } ],
+                    ['Item 2', ['item2'], data => { attr => 4 } ],
+                    divider,
+                    ['Item 3', ['item3'], data => { attr => 7 } ],
+                    divider,
+                    ['Item 4', ['item4'], tabindex => 4 ],
+                 ] %>
+
+    <div class="dropdown">
+        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+            Dropdown 2
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="menuitem" href="item1" tabindex="-1" data-attr="2">Item 1</a></li>
+            <li><a class="menuitem" href="item2" tabindex="-1" data-attr="4">Item 2</a></li>
+            <li class="divider"></li>
+            <li><a class="menuitem" href="item3" tabindex="-1" data-attr="7">Item 3</a></li>
+            <li class="divider"></li>
+            <li><a class="menuitem" href="item4" tabindex="4">Item 4</a></li>
+        </ul>
+    </div>
+
+...but it can be overridden.
+
 =head1 OPTIONS
 
 Some options are available:
@@ -971,6 +714,10 @@ Some options are available:
         tag_prefix => 'bs',
         short_strappings_prefix => 'set',
         init_short_strappings => 1,
+        icons => {
+            class => 'glyphicon'
+            formatter => 'glyphicon-%s',
+        },
     });
 
 =head2 tag_prefix
@@ -1011,6 +758,24 @@ All functionality is available, but instead of C<warning> you must now use C<<__
 
 With short form turned off, sizes are still only supported in long form: C<__xsmall>, C<__small>, C<__medium> and C<__large>. The Bootstrap abbreviations (C<xs> - C<lg>) are not used.
 
+=head2 icons
+
+Default: not set
+
+By setting these keys you activate the C<icon> helper. You can pick any icon pack that sets one main class and one subclass to create an icon.
+
+=over 4
+
+B<C<class>>
+
+This is the main icon class. If you use the glyphicon pack, this should be set to 'glyphicon'.
+
+B<C<formatter>>
+
+This creates the specific icon class. If you use the glyphicon pack, this should be set to 'glyphicon-%s', where the '%s' will be replaced by the icon name you give the C<icon> helper.
+
+=back
+
 =head1 AUTHOR
 
 Erik Carlsson E<lt>csson@cpan.orgE<gt>
@@ -1029,3 +794,4 @@ This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
+ 

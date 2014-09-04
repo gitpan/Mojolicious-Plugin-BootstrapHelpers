@@ -104,8 +104,8 @@ DESCRIPTION
 
     The following strappings are available:
 
-       xsmall    default     striped
-       small     primary     bordered
+       xsmall    default     striped       caret     right
+       small     primary     bordered      divider
        medium    success     hover
        large     info        condensed
                  warning     responsive
@@ -158,14 +158,15 @@ DESCRIPTION
         optional together with the hash. It is usually obvious.
 
     *   Sometimes on nested helpers (such as tables in panels just below),
-        %har is the only thing that can be applied to the other element. In
+        %has is the only thing that can be applied to the other element. In
         this case "panel => { %panel_har }". It follows from above that in
         those cases this entire expression is *also* optional. Such cases
-        are also left out of syntax definitions.
+        are also not marked as optional in syntax definitions and are not
+        mentioned in syntax description, unless they need further comment.
 
     From this definition:
 
-        %= table ($title,) %table_har, (panel => { %panel_har },) begin
+        %= table ($title,) %table_har, panel => { %panel_har }, begin
                $body
         %  end
 
@@ -186,7 +187,7 @@ HELPERS
     Bootstrap documentation <http://getbootstrap.com/components/#panels>
 
    Syntax
-        %= panel ($title, %har, begin
+        %= panel ($title, %has, begin
             $body
         %  end)
 
@@ -266,12 +267,9 @@ HELPERS
    Syntax
         <%= formgroup ($labeltext,)
                        %formgroup_has,
-                      (cols => { $size => [ $label_columns, $input_columns ](, $other_size => [...](, ...)) },)
                        $fieldtype => [
                            $input_name,
                           ($input_value,)
-                          (prepend => $to_prepend,)
-                          (append  => $to_append,)
                            %input_has,
                       ]
 
@@ -286,26 +284,6 @@ HELPERS
 
     Optional. It is either the first argument, or placed in the body. It
     creates a "label" element before the "input".
-
-    "cols"
-
-    Optional. It is only used when the "form" is a ".form-horizontal". You
-    can define the widths for one or more or all of the sizes. See examples.
-
-        $size
-
-        Mandatory. It is one of "xsmall", "small", "medium", or "large".
-        $size takes a two item array reference.
-
-        $label_columns
-
-        Mandatory. The number of columns that should be used by the label
-        for that size.
-
-        $input_columns
-
-        Mandatory. The number of columns used for the input field for that
-        size.
 
     $fieldtype
 
@@ -326,22 +304,6 @@ HELPERS
 
         Optional. If you prefer you can set "value" in %input_has instead.
         (But don't do both for the same field.)
-
-        "prepend => $to_prepend"
-
-        "append => $to_append"
-
-        Optional key-value pairs. Can also be used together. They are used
-        to create input groups
-        <http://getbootstrap.com/components/#input-groups>.
-
-            $to_prepend
-
-            This string is placed directly in front of the "input".
-
-            $to_append
-
-            This string is placed directly after the "input".
 
    Examples
     Basic form group
@@ -425,7 +387,9 @@ HELPERS
     Bootstrap documentation <http://getbootstrap.com/css/#buttons>
 
    Syntax
-        %= button $button_text(, [$url]), %har
+        %= button $button_text(, [$url]), %has
+
+        %= submit_button $text, %has
 
     $button_text
 
@@ -435,6 +399,8 @@ HELPERS
 
     Optional array reference. It is handed off to url_for, so with it this
     is basically link_to with Bootstrap classes.
+
+    Not available for "submit_button".
 
    Examples
         %= button 'The example 5' => large, warning
@@ -448,6 +414,13 @@ HELPERS
         <a class="btn btn-sm" href="http://www.example.com/">The example 1</a>
 
     With a url the button turns into a link.
+
+        %= submit_button 'Save', __primary
+
+        <button class="btn btn-primary" type="submit">Save 2</button>
+
+    A submit button for use in forms. It overrides the build-in
+    submit_button helper.
 
   Tables
    Syntax
@@ -508,7 +481,7 @@ HELPERS
 
   Badges
    Syntax
-        %= badge $text, %har
+        %= badge $text, %has
 
     $text
 
@@ -527,6 +500,117 @@ HELPERS
 
     A right aligned badge with a data attribute.
 
+  Icons
+    This helper needs to be activated separately, see options below.
+
+   Syntax
+        %= icon $icon_name
+
+    $icon_name
+
+    Mandatory. The specific icon you wish to create. Possible values depends
+    on your icon pack.
+
+   Examples
+        <%= icon 'copyright-mark' %>
+        %= icon 'sort-by-attributes-alt'
+
+        <span class="glyphicon glyphicon-copyright-mark"></span>
+        <span class="glyphicon glyphicon-sort-by-attributes-alt"></span>
+
+  Dropdowns
+   Syntax
+        <%= dropdown  $button_text,
+                     (caret,)
+                      %has,
+                     (button => [ %button_has ],)
+                      items  => [ 
+                          [ $itemtext, [ $url ], %item_has ],
+                         (divider,)
+                      ]
+
+    Nesting is currently not supported.
+
+    $button_text
+
+    Mandatory. The text that appears on the menu opening button.
+
+    "caret"
+
+    It is a strapping. If it is used a caret (downward facing arrow) will be
+    placed on the button.
+
+    "items"
+
+    Mandatory array reference. Here are the items that make up the menu. It
+    takes two different types of value (both can occur any number of times:
+
+        "divider"
+
+        Creates a horizontal separator in the menu.
+
+        "[ $itemtext, [ $url ], %item_has ]"
+
+        This creates a linked menu item.
+
+            $itemtext
+
+            Mandatory. The text on the link.
+
+            $url
+
+            Mandatory. It sets the "href" on the link. url_for is used to
+            create the link.
+
+   Examples
+        <%= dropdown 'Dropdown 1',
+                     button => [id => 'a_custom_id'],
+                     items => [
+                        ['Item 1', ['item1'] ],
+                        ['Item 2', ['item2'] ],
+                        divider,
+                        ['Item 3', ['item3'] ]
+                     ] %>
+
+        <div class="dropdown">
+            <button class="btn btn-default dropdown-toggle" type="button" id="a_custom_id" data-toggle="dropdown">Dropdown 1</button>
+            <ul class="dropdown-menu">
+                <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
+                <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
+                <li class="divider"></li>
+                <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>
+            </ul>
+        </div>
+
+    By default, "tabindex" is set to -1...
+
+        <%= dropdown 'Dropdown 2', caret,
+                     items => [
+                        ['Item 1', ['item1'], data => { attr => 2 } ],
+                        ['Item 2', ['item2'], data => { attr => 4 } ],
+                        divider,
+                        ['Item 3', ['item3'], data => { attr => 7 } ],
+                        divider,
+                        ['Item 4', ['item4'], tabindex => 4 ],
+                     ] %>
+
+        <div class="dropdown">
+            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+                Dropdown 2
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="menuitem" href="item1" tabindex="-1" data-attr="2">Item 1</a></li>
+                <li><a class="menuitem" href="item2" tabindex="-1" data-attr="4">Item 2</a></li>
+                <li class="divider"></li>
+                <li><a class="menuitem" href="item3" tabindex="-1" data-attr="7">Item 3</a></li>
+                <li class="divider"></li>
+                <li><a class="menuitem" href="item4" tabindex="4">Item 4</a></li>
+            </ul>
+        </div>
+
+    ...but it can be overridden.
+
 OPTIONS
     Some options are available:
 
@@ -534,6 +618,10 @@ OPTIONS
             tag_prefix => 'bs',
             short_strappings_prefix => 'set',
             init_short_strappings => 1,
+            icons => {
+                class => 'glyphicon'
+                formatter => 'glyphicon-%s',
+            },
         });
 
   tag_prefix
@@ -570,6 +658,23 @@ OPTIONS
     With short form turned off, sizes are still only supported in long form:
     "__xsmall", "__small", "__medium" and "__large". The Bootstrap
     abbreviations ("xs" - "lg") are not used.
+
+  icons
+    Default: not set
+
+    By setting these keys you activate the "icon" helper. You can pick any
+    icon pack that sets one main class and one subclass to create an icon.
+
+        "class"
+
+        This is the main icon class. If you use the glyphicon pack, this
+        should be set to 'glyphicon'.
+
+        "formatter"
+
+        This creates the specific icon class. If you use the glyphicon pack,
+        this should be set to 'glyphicon-%s', where the '%s' will be
+        replaced by the icon name you give the "icon" helper.
 
 AUTHOR
     Erik Carlsson <csson@cpan.org>
