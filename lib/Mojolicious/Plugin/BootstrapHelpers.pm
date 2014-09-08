@@ -1,9 +1,11 @@
 package Mojolicious::Plugin::BootstrapHelpers {
-    use strict;
+$Mojolicious::Plugin::BootstrapHelpers::VERSION = '0.014.001';
+use strict;
+    use warnings;
     use true;
-    
+
     use Mojo::Base 'Mojolicious::Plugin';
-    
+
     use List::AllUtils qw/uniq first_index/;
     use Mojo::ByteStream;
     use Mojo::Util 'xml_escape';
@@ -12,8 +14,6 @@ package Mojolicious::Plugin::BootstrapHelpers {
     use Mojolicious::Plugin::BootstrapHelpers::Helpers;
 
     use experimental 'postderef'; # requires 5.20
-
-    our $VERSION = '0.014';
 
     sub register {
         my $self = shift;
@@ -32,7 +32,7 @@ package Mojolicious::Plugin::BootstrapHelpers {
         $app->helper($tp.'submit_button' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_submit);
         $app->helper($tp.'badge' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_badge);
         $app->helper($tp.'dropdown' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_dropdown);
-        
+
         if(exists $args->{'icons'}{'class'} && $args->{'icons'}{'formatter'}) {
             $app->config->{'Plugin::BootstrapHelpers'} = $args;
             $app->helper($tp.'icon' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_icon);
@@ -40,12 +40,13 @@ package Mojolicious::Plugin::BootstrapHelpers {
 
         if($init_short_strappings) {
             my @sizes = qw/xsmall small medium large/;
-            my @contexts = qw/default primary success info warning danger/;
+            my @contexts = qw/default active primary success info warning danger/;
             my @table = qw/striped bordered hover condensed responsive/;
-            my @direction = qw/right/;
+            my @direction = qw/right block/;
             my @menu = qw/caret divider/;
+            my @misc = qw/disabled/;
 
-            foreach my $helper (@sizes, @contexts, @table, @direction, @menu) {
+            foreach my $helper (@sizes, @contexts, @table, @direction, @menu, @misc) {
                $app->helper($ssp.$helper, sub { ("__$helper" => 1) });
             }
         }
@@ -55,8 +56,7 @@ package Mojolicious::Plugin::BootstrapHelpers {
         my $prefix = shift;
 
         return defined $prefix && !length $prefix   ?   '_'
-             : defined $prefix && $prefix eq '_'    ?   '_'
-             : defined $prefix                      ?   $prefix.'_'
+             : defined $prefix                      ?   $prefix
              :                                          ''
              ;
     }
@@ -69,6 +69,8 @@ __END__
 =head1 NAME
 
 Mojolicious::Plugin::BootstrapHelpers - Type less bootstrap
+
+=for html <p><a style="float: left;" href="https://travis-ci.org/Csson/p5-mojolicious-plugin-bootstraphelpers"><img src="https://travis-ci.org/Csson/p5-mojolicious-plugin-bootstraphelpers.svg?branch=master">&nbsp;</a>
 
 =head1 SYNOPSIS
 
@@ -114,12 +116,12 @@ If you don't know what Bootstrap is, see L<http://www.getbootstrap.com/> for pos
 You might want to use L<Mojolicious::Plugin::Bootstrap3> in your templates.
 
 To get going quickly by using the official CDN you can use the following helpers:
-    
+
     # CSS
     %= bootstrap
 
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    
+
     # or (if you want to use the theme)
     %= bootstrap 'theme'
 
@@ -139,14 +141,14 @@ To get going quickly by using the official CDN you can use the following helpers
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
 It is also possible to automatically include jQuery (2.*)
-    
+
     %= bootstrap 'jsq'
-    
+
     <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
     %= bootstrap 'allq'
-    
+
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
     <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
@@ -155,7 +157,7 @@ It is also possible to automatically include jQuery (2.*)
 
 =head2 Strappings
 
-There are several shortcuts ("strappings") for applying context and size classes that automatically expands to the correct class depending 
+There are several shortcuts ("strappings") for applying context and size classes that automatically expands to the correct class depending
 on which tag it is applied to. For instance, if you apply the C<info> strapping to a panel, it becomes C<panel-info>, but when applied to a button it becomes C<btn-info>.
 
 You can use them in two different ways, but internally they are the same. These to lines are exactly identical:
@@ -186,7 +188,7 @@ If there is no corresponding class for the element you add the strapping to it i
 
 =begin html
 
-<p>The short form is recommended for readability, but it does setup several helpers in your templates. 
+<p>The short form is recommended for readability, but it does setup several helpers in your templates.
 You can turn off the short forms, see <a href="#init_short_strappings">init_short_strappings</a>.</p>
 
 =end html
@@ -194,7 +196,7 @@ You can turn off the short forms, see <a href="#init_short_strappings">init_shor
 =head2 Syntax convention
 
 In the syntax sections below the following conventions are used:
-    
+
     name            A specific string
     $name           Any string
     %name           One or more key-value pairs, written as:
@@ -226,9 +228,9 @@ The following applies to all C<%has> hashes below:
 
 =item * Depending on context either the leading or following comma is optional together with the hash. It is usually obvious.
 
-=item * Sometimes on nested helpers (such as tables in panels just below), C<%has> is the only thing that can be applied to 
+=item * Sometimes on nested helpers (such as tables in panels just below), C<%has> is the only thing that can be applied to
         the other element. In this case C<panel =E<gt> { %panel_has }>. It follows from above that in those cases this entire
-        expression is I<also> optional. Such cases are also not marked as optional in syntax definitions and are not mentioned 
+        expression is I<also> optional. Such cases are also not marked as optional in syntax definitions and are not mentioned
         in syntax description, unless they need further comment.
 
 =back
@@ -240,238 +242,50 @@ From this definition:
     %  end
 
 Both of these are legal:
-    
+
     # since both panel => { %panel_has } and %table_has are hashes, their ordering is not significant.
     %= table 'Heading Table', panel => { success }, condensed, id => 'the-table', begin
          <tr><td>A Table Cell</td></tr>
     %  end
-    
+
 
     %= table begin
          <tr><td>A Table Cell</td></tr>
     %  end
-        
+
 
 
 =head1 HELPERS
 
-=head2 Panels
+L<Bootstrap documentation|http://getbootstrap.com/components/#badges>
 
-L<Bootstrap documentation|http://getbootstrap.com/components/#panels>
+=head2 Badges
 
 =head3 Syntax
 
-    %= panel ($title, %has, begin
-        $body
-    %  end)
+    %= badge $text, %has
 
-B<C<$title>>
+B<C<$text>>
 
-Usually mandatory, but can be omitted if there are no other arguments to the C<panel>. Otherwise, if you don't want a title, set it C<undef>.
+Mandatory. If it is C<undef> no output is produced.
 
-B<C<$body>>
+Available strappings:
 
-Optional (but panels are not much use without it). The html inside the C<panel>.
-
+C<right> Adds C<.pull-right>.
 
 =head3 Examples
 
-B<No body, no title>
+    <%= badge '3' %>
 
-    %= panel
+    <span class="badge">3</span></a>
 
-    <div class="panel panel-default">
-        <div class="panel-body">
-        </div>
-    </div>
+A basic badge.
 
-The class is set to C<panel-default>, by default.
+    <%= badge '4', data => { custom => 'yes' }, right %>
 
-B<Body, no title>
+    <span class="badge pull-right" data-custom="yes">4</span>
 
-    %= panel undef ,=> begin
-        <p>A short text.</p>
-    %  end
-
-    <div class="panel panel-default">
-        <div class="panel-body">
-            <p>A short text.</p>
-        </div>
-    </div>
-
-If you want a panel without title, set the title to C<undef>. Note that you can't use a regular fat comma since that would turn undef into a string. A normal comma is of course also ok.
-
-B<Body and title>
-
-    %= panel 'The header' => begin
-        <p>A short text.</p>
-    %  end
-
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">The Header</h3>
-        </div>
-        <div class="panel-body">
-            <p>A short text.</p>
-        </div>
-    </div>
-
-B<Body and title, with context>
-    
-    %= panel 'Panel 5', success, begin
-        <p>A short text.</p>
-    %  end
-    
-    <div class="panel panel-success">
-        <div class="panel-heading">
-            <h3 class="panel-title">Panel 5</h3>
-        </div>
-        <div class="panel-body">
-            <p>A short text.</p>
-        </div>
-    </div>
-
-Here, the C<success> strapping applies C<.panel-success> to the panel.
-
-
-
-=head2 Form groups
-
-L<Bootstrap documentation|http://getbootstrap.com/css/#forms>
-
-=head3 Syntax
-    
-    <%= formgroup ($labeltext,)
-                   %formgroup_has,
-                  (cols => { $size => [ $label_columns, $input_columns ], (...) })
-                   $fieldtype => [
-                       $input_name,
-                      ($input_value,)
-                       %input_has,
-                  ]
-
-    %>
-    
-    # The $labeltext can also be given in the body
-    %= formgroup <as above>, begin
-        $labeltext
-    %  end
-
-B<C<$labeltext>>
-
-Optional. It is either the first argument, or placed in the body. It creates a C<label> element before the C<input>.
-
-B<C<cols>>
-
-Optional. It is only used when the C<form> is a C<.form-horizontal>. You can defined the widths for one or more or all of the sizes. See examples.
-
-=over 4
-
-B<C<$size>>
-
-Mandatory. It is one of C<xsmall>, C<small>, C<medium> or C<large>. C<$size> takes a two item array reference.
-
-=over 4
-
-B<C<$label_columns>>
-
-Mandatory. The number of columns that should be used by the label for that size of screen. Applies C<.col-$size-$label_columns> on the label.
-
-B<C<$input_columns>>
-
-Mandatory. The number of columns that should be used by the input for that size of screen. Applies C<.col-$size-$input_columns> around the input.
-
-=back
-
-=back
-
-B<C<$fieldtype>>
-
-Mandatory. Is one of C<text_field>, C<password_field>, C<datetime_field>, C<date_field>, C<month_field>, C<time_field>, C<week_field>, 
-C<number_field>, C<email_field>, C<url_field>, C<search_field>, C<tel_field>, C<color_field>.
-
-There can be only one C<$fieldtype> per C<formgroup>.
-
-=over 4
-
-B<C<$name>>
-
-Mandatory. It sets both the C<id> and C<name> of the input field. If the C<$name> contains dashes then those are translated
-into underscores when setting the C<name>. If C<id> exists in C<%input_has> then that is used for the C<id> instead.
-
-B<C<$input_value>>
-
-Optional. If you prefer you can set C<value> in C<%input_has> instead. (But don't do both for the same field.)
-
-=back
-
-
-=head3 Examples
-
-B<Basic form group>
-    
-    %= formgroup 'Text test 1', text_field => ['test_text']
-
-    <div class="form-group">
-        <label class="control-label" for="test_text">Text test 1</label>
-        <input class="form-control" id="test_text" name="test_text" type="text" />
-    </div>
-
-The first item in the array ref is used for both C<id> and C<name>. Except...
-
-
-    %= formgroup 'Text test 4', text_field => ['test_text', large]
-
-    <div class="form-group">
-        <label class="control-label" for="test-text">Text test 4</label>
-        <div class="input-group">
-            <input class="form-control input-lg" id="test-text" name="test_text" type="text" />
-            <span class="input-group-addon">.00</span>
-        </div>
-    </div>
-
-...if the input name (the first item in the text_field array ref) contains dashes -- those are replaced (in the C<name>) to underscores.
-
-Strappings can also be used in this context. Here C<large> applies C<.input-lg>.
-
-
-    %= formgroup 'Text test 5', text_field => ['test_text', '200' ]
-
-    <div class="form-group">
-        <label class="control-label" for="test_text">Text test 5</label>
-        <input class="form-control" id="test_text" name="test_text" type="text" value="200" />
-    </div>
-
-Here, the second item in the C<text_field> array reference is a value that populates the C<input>.
-
-=begin html
-
-<p><hr></p>
-
-=end html 
-
-    %= formgroup 'Text test 6', text_field => ['test_text'], large
-
-    <div class="form-group form-group-lg">
-        <label class="control-label" for="test_text">Text test 6</label>
-        <input class="form-control" id="test_text" name="test_text" type="text" />
-    </div>
-
-Note the difference with the earlier example. Here C<large> is outside the C<text_field> array reference, and therefore C<.form-group-lg> is applied to the form group. 
-
-
-    %= formgroup 'Text test 8', text_field => ['test_text'], cols => { medium => [2, 10], small => [4, 8] }
-
-    <div class="form-group">
-        <label class="control-label col-md-2 col-sm-4" for="test_text">Text test 8</label>
-        <div class="col-md-10 col-sm-8">
-            <input class="form-control" id="test_text" name="test_text" type="text" />
-        </div>
-    </div>
-
-If the C<form> is C<.form-horizontal>, you can set the column widths with the C<cols> attribute. The first item in each array ref is for the label, and the second for the input.
-
-(Note that in this context, C<medium> and C<large> are not short form strappings. Those don't take arguments.)
+A right aligned badge with a data attribute.
 
 
 
@@ -503,7 +317,7 @@ Not available for C<submit_button>.
     <button class="btn btn-lg btn-warning">The example 5</button>
 
 An ordinary button, with applied strappings.
-    
+
     %= button 'The example 1' => ['http://www.example.com/'], small
 
     <a class="btn btn-sm" href="http://www.example.com/">The example 1</a>
@@ -516,122 +330,17 @@ With a url the button turns into a link.
 
 A submit button for use in forms. It overrides the build-in submit_button helper.
 
-=head2 Tables
-
-=head3 Syntax
-    
-    %= table ($title,) %table_has, panel => { %panel_has }, begin
-           $body
-    %  end
-    
-B<C<$title>>
-
-Optional. If set the table will be wrapped in a panel, and the table replaces the body in the panel.
-
-B<C<$body>>
-
-Mandatory. C<thead>, C<td> and so on.
-
-B<C<panel =E<gt> { %panel_has }>>
-
-Optional if the table has a C<$title>, otherwise without use.
-
-
-=head3 Examples
-
-L<Bootstrap documentation|http://getbootstrap.com/css/#tables>
-
-    <%= table begin %>
-        <tr><td>Table 1</td></tr>
-    <% end %>
-
-    <table class="table">
-        <tr><td>Table 1</td></tr>
-    </table>
-
-A basic table.
-
-    %= table hover, striped, condensed, begin
-        <tr><td>Table 2</td></tr>
-    %  end
-
-    <table class="table table-condensed table-hover table-striped">
-        <tr><td>Table 2</td></tr>
-    </table>
-
-Several classes applied to the table.
-
-    %= table 'Heading Table 4', panel => { success }, condensed, id => 'the-table', begin
-        <tr><td>Table 4</td></tr>
-    %  end
-
-    <div class="panel panel-success">
-        <div class="panel-heading">
-            <h3 class="panel-title">Heading Table 4</h3>
-        </div>
-        <table class="table table-condensed" id="the-table">
-            <tr><td>Table 4</td></tr>
-        </table>
-    </div>
-
-A C<condensed> table with an C<id> wrapped in a C<success> panel.
-
-
-=head2 Badges
-
-=head3 Syntax
-
-    %= badge $text, %has
-
-B<C<$text>>
-
-Mandatory. If it is C<undef> no output is produced.
-
-=head3 Examples
-
-    <%= badge '3' %>
-
-    <span class="badge">3</span></a>
-    
-A basic badge.
-
-    <%= badge '4', data => { custom => 'yes' }, right %>
-    
-    <span class="badge pull-right" data-custom="yes">4</span>
-
-A right aligned badge with a data attribute.
-
-
-=head2 Icons
-
-This helper needs to be activated separately, see options below.
-
-=head3 Syntax
-
-    %= icon $icon_name
-
-B<C<$icon_name>>
-
-Mandatory. The specific icon you wish to create. Possible values depends on your icon pack.
-
-=head3 Examples
-    
-    <%= icon 'copyright-mark' %>
-    %= icon 'sort-by-attributes-alt'
-
-    <span class="glyphicon glyphicon-copyright-mark"></span>
-    <span class="glyphicon glyphicon-sort-by-attributes-alt"></span>
 
 
 =head2 Dropdowns
 
 =head3 Syntax
-    
+
     <%= dropdown  $button_text,
                  (caret,)
                   %has,
                  (button => [ %button_has ],)
-                  items  => [ 
+                  items  => [
                       [ $itemtext, [ $url ], %item_has ],
                      (divider,)
                   ]
@@ -724,6 +433,319 @@ By default, C<tabindex> is set to C<-1>...
 
 ...but it can be overridden.
 
+
+
+=head2 Form groups
+
+L<Bootstrap documentation|http://getbootstrap.com/css/#forms>
+
+=head3 Syntax
+
+    <%= formgroup ($labeltext,)
+                   %formgroup_has,
+                  (cols => { $size => [ $label_columns, $input_columns ], (...) })
+                   $fieldtype => [
+                       $input_name,
+                      ($input_value,)
+                       %input_has,
+                  ]
+
+    %>
+
+    # The $labeltext can also be given in the body
+    %= formgroup <as above>, begin
+        $labeltext
+    %  end
+
+B<C<$labeltext>>
+
+Optional. It is either the first argument, or placed in the body. It creates a C<label> element before the C<input>.
+
+B<C<cols>>
+
+Optional. It is only used when the C<form> is a C<.form-horizontal>. You can defined the widths for one or more or all of the sizes. See examples.
+
+=over 4
+
+B<C<$size>>
+
+Mandatory. It is one of C<xsmall>, C<small>, C<medium> or C<large>. C<$size> takes a two item array reference.
+
+=over 4
+
+B<C<$label_columns>>
+
+Mandatory. The number of columns that should be used by the label for that size of screen. Applies C<.col-$size-$label_columns> on the label.
+
+B<C<$input_columns>>
+
+Mandatory. The number of columns that should be used by the input for that size of screen. Applies C<.col-$size-$input_columns> around the input.
+
+=back
+
+=back
+
+B<C<$fieldtype>>
+
+Mandatory. Is one of C<text_field>, C<password_field>, C<datetime_field>, C<date_field>, C<month_field>, C<time_field>, C<week_field>,
+C<number_field>, C<email_field>, C<url_field>, C<search_field>, C<tel_field>, C<color_field>.
+
+There can be only one C<$fieldtype> per C<formgroup>.
+
+=over 4
+
+B<C<$name>>
+
+Mandatory. It sets both the C<id> and C<name> of the input field. If the C<$name> contains dashes then those are translated
+into underscores when setting the C<name>. If C<id> exists in C<%input_has> then that is used for the C<id> instead.
+
+B<C<$input_value>>
+
+Optional. If you prefer you can set C<value> in C<%input_has> instead. (But don't do both for the same field.)
+
+=back
+
+
+=head3 Examples
+
+B<Basic form group>
+
+    %= formgroup 'Text test 1', text_field => ['test_text']
+
+    <div class="form-group">
+        <label class="control-label" for="test_text">Text test 1</label>
+        <input class="form-control" id="test_text" name="test_text" type="text" />
+    </div>
+
+The first item in the array ref is used for both C<id> and C<name>. Except...
+
+
+    %= formgroup 'Text test 4', text_field => ['test_text', large]
+
+    <div class="form-group">
+        <label class="control-label" for="test-text">Text test 4</label>
+        <div class="input-group">
+            <input class="form-control input-lg" id="test-text" name="test_text" type="text" />
+            <span class="input-group-addon">.00</span>
+        </div>
+    </div>
+
+...if the input name (the first item in the text_field array ref) contains dashes -- those are replaced (in the C<name>) to underscores.
+
+Strappings can also be used in this context. Here C<large> applies C<.input-lg>.
+
+
+    %= formgroup 'Text test 5', text_field => ['test_text', '200' ]
+
+    <div class="form-group">
+        <label class="control-label" for="test_text">Text test 5</label>
+        <input class="form-control" id="test_text" name="test_text" type="text" value="200" />
+    </div>
+
+Here, the second item in the C<text_field> array reference is a value that populates the C<input>.
+
+=begin html
+
+<p style="height: 5px; background-color: #565656;">&nbsp;</p>
+
+=end html
+
+    %= formgroup 'Text test 6', text_field => ['test_text'], large
+
+    <div class="form-group form-group-lg">
+        <label class="control-label" for="test_text">Text test 6</label>
+        <input class="form-control" id="test_text" name="test_text" type="text" />
+    </div>
+
+Note the difference with the earlier example. Here C<large> is outside the C<text_field> array reference, and therefore C<.form-group-lg> is applied to the form group.
+
+
+    %= formgroup 'Text test 8', text_field => ['test_text'], cols => { medium => [2, 10], small => [4, 8] }
+
+    <div class="form-group">
+        <label class="control-label col-md-2 col-sm-4" for="test_text">Text test 8</label>
+        <div class="col-md-10 col-sm-8">
+            <input class="form-control" id="test_text" name="test_text" type="text" />
+        </div>
+    </div>
+
+If the C<form> is C<.form-horizontal>, you can set the column widths with the C<cols> attribute. The first item in each array ref is for the label, and the second for the input.
+
+(Note that in this context, C<medium> and C<large> are not short form strappings. Those don't take arguments.)
+
+
+=head2 Icons
+
+This helper needs to be activated separately, see options below.
+
+=head3 Syntax
+
+    %= icon $icon_name
+
+B<C<$icon_name>>
+
+Mandatory. The specific icon you wish to create. Possible values depends on your icon pack.
+
+=head3 Examples
+
+    <%= icon 'copyright-mark' %>
+    %= icon 'sort-by-attributes-alt'
+
+    <span class="glyphicon glyphicon-copyright-mark"></span>
+    <span class="glyphicon glyphicon-sort-by-attributes-alt"></span>
+
+
+=head2 Panels
+
+L<Bootstrap documentation|http://getbootstrap.com/components/#panels>
+
+=head3 Syntax
+
+    %= panel ($title, %has, begin
+        $body
+    %  end)
+
+B<C<$title>>
+
+Usually mandatory, but can be omitted if there are no other arguments to the C<panel>. Otherwise, if you don't want a title, set it C<undef>.
+
+B<C<$body>>
+
+Optional (but panels are not much use without it). The html inside the C<panel>.
+
+
+=head3 Examples
+
+B<No body, no title>
+
+    %= panel
+
+&nbsp;
+
+<hr>&nbsp;</hr>
+
+<hr />
+
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+        </div>
+    </div>
+
+The class is set to C<panel-default>, by default.
+
+B<Body, no title>
+
+    %= panel undef ,=> begin
+        <p>A short text.</p>
+    %  end
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <p>A short text.</p>
+        </div>
+    </div>
+
+If you want a panel without title, set the title to C<undef>. Note that you can't use a regular fat comma since that would turn undef into a string. A normal comma is of course also ok.
+
+B<Body and title>
+
+    %= panel 'The header' => begin
+        <p>A short text.</p>
+    %  end
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">The Header</h3>
+        </div>
+        <div class="panel-body">
+            <p>A short text.</p>
+        </div>
+    </div>
+
+B<Body and title, with context>
+
+    %= panel 'Panel 5', success, begin
+        <p>A short text.</p>
+    %  end
+
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            <h3 class="panel-title">Panel 5</h3>
+        </div>
+        <div class="panel-body">
+            <p>A short text.</p>
+        </div>
+    </div>
+
+Here, the C<success> strapping applies C<.panel-success> to the panel.
+
+
+
+
+
+=head2 Tables
+
+=head3 Syntax
+
+    %= table ($title,) %table_has, panel => { %panel_has }, begin
+           $body
+    %  end
+
+B<C<$title>>
+
+Optional. If set the table will be wrapped in a panel, and the table replaces the body in the panel.
+
+B<C<$body>>
+
+Mandatory. C<thead>, C<td> and so on.
+
+B<C<panel =E<gt> { %panel_has }>>
+
+Optional if the table has a C<$title>, otherwise without use.
+
+
+=head3 Examples
+
+L<Bootstrap documentation|http://getbootstrap.com/css/#tables>
+
+    <%= table begin %>
+        <tr><td>Table 1</td></tr>
+    <% end %>
+
+    <table class="table">
+        <tr><td>Table 1</td></tr>
+    </table>
+
+A basic table.
+
+    %= table hover, striped, condensed, begin
+        <tr><td>Table 2</td></tr>
+    %  end
+
+    <table class="table table-condensed table-hover table-striped">
+        <tr><td>Table 2</td></tr>
+    </table>
+
+Several classes applied to the table.
+
+    %= table 'Heading Table 4', panel => { success }, condensed, id => 'the-table', begin
+        <tr><td>Table 4</td></tr>
+    %  end
+
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            <h3 class="panel-title">Heading Table 4</h3>
+        </div>
+        <table class="table table-condensed" id="the-table">
+            <tr><td>Table 4</td></tr>
+        </table>
+    </div>
+
+A C<condensed> table with an C<id> wrapped in a C<success> panel.
+
+
+
 =head1 OPTIONS
 
 Some options are available:
@@ -742,7 +764,7 @@ Some options are available:
 
 Default: C<undef>
 
-If you want to you change the name of the tag helpers, by applying a prefix. These are not aliases; 
+If you want to you change the name of the tag helpers, by applying a prefix. These are not aliases;
 by setting a prefix the original names are no longer available. The following rules are used:
 
 =over 4
@@ -754,10 +776,9 @@ If the option is missing, or is C<undef>, there is no prefix.
 If the option is set to the empty string, the prefix is C<_>. That is, C<panel> is now used as C<_panel>.
 
 =item *
-If the option is set to any other string, the prefix is that string followed by C<_>. If you set C<tag_prefix =E<gt> 'bs'>, then C<panel> is now used as C<bs_panel>.
+If the option is set to any other string, the prefix is that string. If you set C<tag_prefix =E<gt> 'bs'>, then C<panel> is now used as C<bspanel>.
 
 =back
-
 
 =head2 short_strappings_prefix
 
@@ -812,4 +833,3 @@ This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
- 
