@@ -22,9 +22,11 @@ my $test = Test::Mojo::Trim->new;
 
 
 
+
 #** test from dropdown-1.mojo, line 1
 
-my $expected_dropdown_1_1 = qq{     <div class="dropdown">
+my $expected_dropdown_1_1 = qq{
+    <div class="dropdown">
         <button class="btn btn-default dropdown-toggle" type="button" id="a_custom_id" data-toggle="dropdown">Dropdown 1</button>
         <ul class="dropdown-menu">
             <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
@@ -32,17 +34,19 @@ my $expected_dropdown_1_1 = qq{     <div class="dropdown">
             <li class="divider"></li>
             <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>
         </ul>
-    </div> };
+    </div>
+};
 
 get '/dropdown_1_1' => 'dropdown_1_1';
 
 $test->get_ok('/dropdown_1_1')->status_is(200)->trimmed_content_is($expected_dropdown_1_1, 'Matched trimmed content in dropdown-1.mojo, line 1');
 
-#** test from dropdown-1.mojo, line 25
 
-my $expected_dropdown_1_2 = qq{     <div class="dropdown">
-        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Dropdown 2<span class="caret"></span>
-        </button>
+#** test from dropdown-1.mojo, line 27
+
+my $expected_dropdown_1_2 = qq{
+    <div class="dropdown">
+        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Dropdown 2<span class="caret"></span></button>
         <ul class="dropdown-menu">
             <li><a class="menuitem" href="item1" tabindex="-1" data-attr="2">Item 1</a></li>
             <li><a class="menuitem" href="item2" tabindex="-1" data-attr="4">Item 2</a></li>
@@ -52,17 +56,18 @@ my $expected_dropdown_1_2 = qq{     <div class="dropdown">
             <li><a class="menuitem" href="item4" tabindex="4">Item 4</a></li>
         </ul>
     </div>
- };
+};
 
 get '/dropdown_1_2' => 'dropdown_1_2';
 
-$test->get_ok('/dropdown_1_2')->status_is(200)->trimmed_content_is($expected_dropdown_1_2, 'Matched trimmed content in dropdown-1.mojo, line 25');
+$test->get_ok('/dropdown_1_2')->status_is(200)->trimmed_content_is($expected_dropdown_1_2, 'Matched trimmed content in dropdown-1.mojo, line 27');
 
 done_testing();
 
 __DATA__
 
 @@ dropdown_1_1.html.ep
+
 
     <%= dropdown 'Dropdown 1',
          button => [id => 'a_custom_id'],
@@ -73,7 +78,9 @@ __DATA__
             ['Item 3', ['item3'] ]
          ] %>
 
+
 @@ dropdown_1_2.html.ep
+
 
     <%= dropdown 'Dropdown 2', caret,
          items => [

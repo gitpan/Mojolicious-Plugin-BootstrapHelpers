@@ -193,22 +193,18 @@ HELPERS
 
     Mandatory. If it is "undef" no output is produced.
 
-    Available strappings:
+    Available strappings
 
-    "right" Adds ".pull-right".
+    "right" applies ".pull-right".
 
    Examples
         <%= badge '3' %>
 
         <span class="badge">3</span></a>
 
-    A basic badge.
-
         <%= badge '4', data => { custom => 'yes' }, right %>
 
         <span class="badge pull-right" data-custom="yes">4</span>
-
-    A right aligned badge with a data attribute.
 
   Buttons
     Bootstrap documentation <http://getbootstrap.com/css/#buttons>
@@ -229,30 +225,35 @@ HELPERS
 
     Not available for "submit_button".
 
+    Available strappings
+
+    "default" "primary" "success" "info" "warning" "danger" "link" applies
+    the various ".btn-*" classes.
+
+    "large" "small" "xsmall" applies ".btn-lg" ".btn-sm" ".btn-xs"
+    respectively.
+
+    "active" "block" applies the ".active" and ".block" classes.
+
+    "disabled" applies the ".disabled" class if the generated element is an
+    "<a>". On a "<button>" it applies the "disabled="disabled"" attribute.
+
    Examples
         %= button 'The example 5' => large, warning
 
         <button class="btn btn-lg btn-warning">The example 5</button>
 
-    An ordinary button, with applied strappings.
-
         %= button 'The example 1' => ['http://www.example.com/'], small
 
-        <a class="btn btn-sm" href="http://www.example.com/">The example 1</a>
+        <a class="btn btn-default btn-sm" href="http://www.example.com/">The example 1</a>
 
-    With a url the button turns into a link.
-
-        %= submit_button 'Save', __primary
+        %= submit_button 'Save 2', primary
 
         <button class="btn btn-primary" type="submit">Save 2</button>
-
-    A submit button for use in forms. It overrides the build-in
-    submit_button helper.
 
   Dropdowns
    Syntax
         <%= dropdown  $button_text,
-                     (caret,)
                       %has,
                      (button => [ %button_has ],)
                       items  => [
@@ -293,15 +294,19 @@ HELPERS
             Mandatory. It sets the "href" on the link. url_for is used to
             create the link.
 
+    Available strappings
+
+    "caret" adds a "<span class="caret"></span<>" element on the button.
+
    Examples
         <%= dropdown 'Dropdown 1',
-                     button => [id => 'a_custom_id'],
-                     items => [
-                        ['Item 1', ['item1'] ],
-                        ['Item 2', ['item2'] ],
-                        divider,
-                        ['Item 3', ['item3'] ]
-                     ] %>
+             button => [id => 'a_custom_id'],
+             items => [
+                ['Item 1', ['item1'] ],
+                ['Item 2', ['item2'] ],
+                divider,
+                ['Item 3', ['item3'] ]
+             ] %>
 
         <div class="dropdown">
             <button class="btn btn-default dropdown-toggle" type="button" id="a_custom_id" data-toggle="dropdown">Dropdown 1</button>
@@ -313,23 +318,18 @@ HELPERS
             </ul>
         </div>
 
-    By default, "tabindex" is set to -1...
-
         <%= dropdown 'Dropdown 2', caret,
-                     items => [
-                        ['Item 1', ['item1'], data => { attr => 2 } ],
-                        ['Item 2', ['item2'], data => { attr => 4 } ],
-                        divider,
-                        ['Item 3', ['item3'], data => { attr => 7 } ],
-                        divider,
-                        ['Item 4', ['item4'], tabindex => 4 ],
-                     ] %>
+             items => [
+                ['Item 1', ['item1'], data => { attr => 2 } ],
+                ['Item 2', ['item2'], data => { attr => 4 } ],
+                divider,
+                ['Item 3', ['item3'], data => { attr => 7 } ],
+                divider,
+                ['Item 4', ['item4'], tabindex => 4 ],
+             ] %>
 
         <div class="dropdown">
-            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
-                Dropdown 2
-                <span class="caret"></span>
-            </button>
+            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Dropdown 2<span class="caret"></span></button>
             <ul class="dropdown-menu">
                 <li><a class="menuitem" href="item1" tabindex="-1" data-attr="2">Item 1</a></li>
                 <li><a class="menuitem" href="item2" tabindex="-1" data-attr="4">Item 2</a></li>
@@ -339,8 +339,6 @@ HELPERS
                 <li><a class="menuitem" href="item4" tabindex="4">Item 4</a></li>
             </ul>
         </div>
-
-    ...but it can be overridden.
 
   Form groups
     Bootstrap documentation <http://getbootstrap.com/css/#forms>
@@ -411,70 +409,12 @@ HELPERS
         (But don't do both for the same field.)
 
    Examples
-    Basic form group
-
-        %= formgroup 'Text test 1', text_field => ['test_text']
-
-        <div class="form-group">
-            <label class="control-label" for="test_text">Text test 1</label>
-            <input class="form-control" id="test_text" name="test_text" type="text" />
-        </div>
-
-    The first item in the array ref is used for both "id" and "name".
-    Except...
-
-        %= formgroup 'Text test 4', text_field => ['test_text', large]
+        %= formgroup 'Text test 4', text_field => ['test-text', large]
 
         <div class="form-group">
             <label class="control-label" for="test-text">Text test 4</label>
-            <div class="input-group">
-                <input class="form-control input-lg" id="test-text" name="test_text" type="text" />
-                <span class="input-group-addon">.00</span>
-            </div>
+            <input class="form-control input-lg" id="test-text" name="test_text" type="text" />
         </div>
-
-    ...if the input name (the first item in the text_field array ref)
-    contains dashes -- those are replaced (in the "name") to underscores.
-
-    Strappings can also be used in this context. Here "large" applies
-    ".input-lg".
-
-        %= formgroup 'Text test 5', text_field => ['test_text', '200' ]
-
-        <div class="form-group">
-            <label class="control-label" for="test_text">Text test 5</label>
-            <input class="form-control" id="test_text" name="test_text" type="text" value="200" />
-        </div>
-
-    Here, the second item in the "text_field" array reference is a value
-    that populates the "input".
-
-        %= formgroup 'Text test 6', text_field => ['test_text'], large
-
-        <div class="form-group form-group-lg">
-            <label class="control-label" for="test_text">Text test 6</label>
-            <input class="form-control" id="test_text" name="test_text" type="text" />
-        </div>
-
-    Note the difference with the earlier example. Here "large" is outside
-    the "text_field" array reference, and therefore ".form-group-lg" is
-    applied to the form group.
-
-        %= formgroup 'Text test 8', text_field => ['test_text'], cols => { medium => [2, 10], small => [4, 8] }
-
-        <div class="form-group">
-            <label class="control-label col-md-2 col-sm-4" for="test_text">Text test 8</label>
-            <div class="col-md-10 col-sm-8">
-                <input class="form-control" id="test_text" name="test_text" type="text" />
-            </div>
-        </div>
-
-    If the "form" is ".form-horizontal", you can set the column widths with
-    the "cols" attribute. The first item in each array ref is for the label,
-    and the second for the input.
-
-    (Note that in this context, "medium" and "large" are not short form
-    strappings. Those don't take arguments.)
 
   Icons
     This helper needs to be activated separately, see options below.
@@ -513,24 +453,12 @@ HELPERS
     "panel".
 
    Examples
-    No body, no title
-
         %= panel
-
-    &nbsp;
-
-    <hr>&nbsp;</hr>
-
-    <hr />
 
         <div class="panel panel-default">
             <div class="panel-body">
             </div>
         </div>
-
-    The class is set to "panel-default", by default.
-
-    Body, no title
 
         %= panel undef ,=> begin
             <p>A short text.</p>
@@ -542,13 +470,7 @@ HELPERS
             </div>
         </div>
 
-    If you want a panel without title, set the title to "undef". Note that
-    you can't use a regular fat comma since that would turn undef into a
-    string. A normal comma is of course also ok.
-
-    Body and title
-
-        %= panel 'The header' => begin
+        %= panel 'The Header' => begin
             <p>A short text.</p>
         %  end
 
@@ -561,7 +483,6 @@ HELPERS
             </div>
         </div>
 
-    Body and title, with context
 
         %= panel 'Panel 5', success, begin
             <p>A short text.</p>
@@ -576,9 +497,9 @@ HELPERS
             </div>
         </div>
 
-    Here, the "success" strapping applies ".panel-success" to the panel.
-
   Tables
+    Bootstrap documentation <http://getbootstrap.com/css/#tables>
+
    Syntax
         %= table ($title,) %table_has, panel => { %panel_has }, begin
                $body
@@ -598,8 +519,6 @@ HELPERS
     Optional if the table has a $title, otherwise without use.
 
    Examples
-    Bootstrap documentation <http://getbootstrap.com/css/#tables>
-
         <%= table begin %>
             <tr><td>Table 1</td></tr>
         <% end %>
@@ -608,8 +527,6 @@ HELPERS
             <tr><td>Table 1</td></tr>
         </table>
 
-    A basic table.
-
         %= table hover, striped, condensed, begin
             <tr><td>Table 2</td></tr>
         %  end
@@ -617,8 +534,6 @@ HELPERS
         <table class="table table-condensed table-hover table-striped">
             <tr><td>Table 2</td></tr>
         </table>
-
-    Several classes applied to the table.
 
         %= table 'Heading Table 4', panel => { success }, condensed, id => 'the-table', begin
             <tr><td>Table 4</td></tr>
@@ -632,8 +547,6 @@ HELPERS
                 <tr><td>Table 4</td></tr>
             </table>
         </div>
-
-    A "condensed" table with an "id" wrapped in a "success" panel.
 
 OPTIONS
     Some options are available:

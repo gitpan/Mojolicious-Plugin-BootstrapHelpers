@@ -1,5 +1,5 @@
 package Mojolicious::Plugin::BootstrapHelpers::Helpers {
-$Mojolicious::Plugin::BootstrapHelpers::Helpers::VERSION = '0.014.001';
+$Mojolicious::Plugin::BootstrapHelpers::Helpers::VERSION = '0.015.000';
 use strict;
     use warnings;
     use Mojo::Base 'Mojolicious::Plugin';
