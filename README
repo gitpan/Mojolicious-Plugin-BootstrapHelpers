@@ -105,7 +105,7 @@ DESCRIPTION
     The following strappings are available:
 
        xsmall    default     striped       caret     right
-       small     primary     bordered      divider
+       small     primary     bordered
        medium    success     hover
        large     info        condensed
                  warning     responsive
@@ -258,7 +258,8 @@ HELPERS
                      (button => [ %button_has ],)
                       items  => [
                           [ $itemtext, [ $url ], %item_has ],
-                         (divider,)
+                         ($headertext,)
+                         ([],)
                       ]
 
     Nesting is currently not supported.
@@ -277,10 +278,6 @@ HELPERS
     Mandatory array reference. Here are the items that make up the menu. It
     takes two different types of value (both can occur any number of times:
 
-        "divider"
-
-        Creates a horizontal separator in the menu.
-
         "[ $itemtext, [ $url ], %item_has ]"
 
         This creates a linked menu item.
@@ -294,6 +291,14 @@ HELPERS
             Mandatory. It sets the "href" on the link. url_for is used to
             create the link.
 
+        $headertext
+
+        A string creates a dropdown header.
+
+        "[]"
+
+        An empty array reference creates a divider.
+
     Available strappings
 
     "caret" adds a "<span class="caret"></span<>" element on the button.
@@ -304,7 +309,7 @@ HELPERS
              items => [
                 ['Item 1', ['item1'] ],
                 ['Item 2', ['item2'] ],
-                divider,
+                [],
                 ['Item 3', ['item3'] ]
              ] %>
 
@@ -322,10 +327,12 @@ HELPERS
              items => [
                 ['Item 1', ['item1'], data => { attr => 2 } ],
                 ['Item 2', ['item2'], data => { attr => 4 } ],
-                divider,
+                [],
                 ['Item 3', ['item3'], data => { attr => 7 } ],
-                divider,
+                [],
                 ['Item 4', ['item4'], tabindex => 4 ],
+                'This is a header',
+                ['Item 5', ['item5'] ],
              ] %>
 
         <div class="dropdown">
@@ -337,6 +344,8 @@ HELPERS
                 <li><a class="menuitem" href="item3" tabindex="-1" data-attr="7">Item 3</a></li>
                 <li class="divider"></li>
                 <li><a class="menuitem" href="item4" tabindex="4">Item 4</a></li>
+                <li class="dropdown-header">This is a header</li>
+                <li><a class="menuitem" href="item5" tabindex="-1">Item 5</a></li>
             </ul>
         </div>
 

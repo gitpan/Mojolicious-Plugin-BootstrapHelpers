@@ -1,5 +1,5 @@
 package Mojolicious::Plugin::BootstrapHelpers::Helpers {
-$Mojolicious::Plugin::BootstrapHelpers::Helpers::VERSION = '0.015.000';
+$Mojolicious::Plugin::BootstrapHelpers::Helpers::VERSION = '0.015.001';
 use strict;
     use warnings;
     use Mojo::Base 'Mojolicious::Plugin';
@@ -175,9 +175,19 @@ use strict;
         my $button = bootstrap_button($c, $button_text, $button_attr->%*, __caret => $attr->{'__caret'});
 
         my $menuitems = '';
+        ITEM:
         foreach my $item ($items_info->@*) {
-            $menuitems .= q{<li class="divider"></li>} if $item eq '__divider';
-            $menuitems .= create_dropdown_menuitem($c, $item->@*) if ref $item eq 'ARRAY';
+            if(ref $item eq '') {
+                $menuitems .= qq{<li class="dropdown-header">$item</li>};
+            }
+            next ITEM if ref $item ne 'ARRAY';
+            if(!scalar $item->@*) {
+                $menuitems .= q{<li class="divider"></li>} ;
+            }
+            else {
+                $menuitems .= create_dropdown_menuitem($c, $item->@*);
+            }
+
         }
 
         my $dropdown = qq{
@@ -193,7 +203,7 @@ use strict;
 
     }
 
-    sub create_dropdown_menuitem {use Data::Dumper 'Dumper';
+    sub create_dropdown_menuitem {
         my $c = shift;
         my $item_text = iscoderef($_[-1]) ? pop : shift;
         my @url = shift->@*;
@@ -459,7 +469,7 @@ use strict;
         return { map { ("__$_" => $_, $_ => $_) } qw/right block/ };
     }
     sub _menu_contexts {
-        return { map { ("__$_" => $_, $_ => $_) } qw/caret divider/ };
+        return { map { ("__$_" => undef, $_ => undef) } qw/caret/ };
     }
     sub _misc_contexts {
         return { map { ("__$_" => $_, $_ => $_) } qw/active disabled/ };

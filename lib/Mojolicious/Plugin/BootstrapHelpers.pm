@@ -1,5 +1,5 @@
 package Mojolicious::Plugin::BootstrapHelpers {
-$Mojolicious::Plugin::BootstrapHelpers::VERSION = '0.015.000';
+$Mojolicious::Plugin::BootstrapHelpers::VERSION = '0.015.001';
 use strict;
     use warnings;
     use true;
@@ -43,7 +43,7 @@ use strict;
             my @contexts = qw/default active primary success info warning danger/;
             my @table = qw/striped bordered hover condensed responsive/;
             my @direction = qw/right block/;
-            my @menu = qw/caret divider/;
+            my @menu = qw/caret/;
             my @misc = qw/disabled/;
 
             foreach my $helper (@sizes, @contexts, @table, @direction, @menu, @misc) {
@@ -174,7 +174,7 @@ They are shortened to the Bootstrap type classes.
 The following strappings are available:
 
    xsmall    default     striped       caret     right
-   small     primary     bordered      divider
+   small     primary     bordered
    medium    success     hover
    large     info        condensed
              warning     responsive
@@ -396,7 +396,8 @@ A submit button for use in forms. It overrides the build-in submit_button helper
                  (button => [ %button_has ],)
                   items  => [
                       [ $itemtext, [ $url ], %item_has ],
-                     (divider,)
+                     ($headertext,)
+                     ([],)
                   ]
 
 Nesting is currently not supported.
@@ -415,10 +416,6 @@ Mandatory array reference. Here are the items that make up the menu. It takes tw
 
 =over 4
 
-B<C<divider>>
-
-Creates a horizontal separator in the menu.
-
 B<C<[ $itemtext, [ $url ], %item_has ]>>
 
 This creates a linked menu item.
@@ -434,6 +431,14 @@ B<C<$url>>
 Mandatory. It sets the C<href> on the link. L<url_for|Mojolicious::Controller#url_for> is used to create the link.
 
 =back
+
+B<C<$headertext>>
+
+A string creates a dropdown header.
+
+B<C<[]>>
+
+An empty array reference creates a divider.
 
 =back
 
@@ -451,7 +456,7 @@ C<caret> adds a C<E<lt>span class="caret"E<gt>E<lt>/span<E<gt>> element on the b
          items => [
             ['Item 1', ['item1'] ],
             ['Item 2', ['item2'] ],
-            divider,
+            [],
             ['Item 3', ['item3'] ]
          ] %>
 
@@ -468,7 +473,7 @@ C<caret> adds a C<E<lt>span class="caret"E<gt>E<lt>/span<E<gt>> element on the b
 =begin html
 
 <p>
-By default, C<tabindex> is set to C<-1>...
+By default, <code>tabindex</code> is set to <code>-1</code>...
 
 </p>
 
@@ -479,10 +484,12 @@ By default, C<tabindex> is set to C<-1>...
          items => [
             ['Item 1', ['item1'], data => { attr => 2 } ],
             ['Item 2', ['item2'], data => { attr => 4 } ],
-            divider,
+            [],
             ['Item 3', ['item3'], data => { attr => 7 } ],
-            divider,
+            [],
             ['Item 4', ['item4'], tabindex => 4 ],
+            'This is a header',
+            ['Item 5', ['item5'] ],
          ] %>
 
     <div class="dropdown">
@@ -494,6 +501,8 @@ By default, C<tabindex> is set to C<-1>...
             <li><a class="menuitem" href="item3" tabindex="-1" data-attr="7">Item 3</a></li>
             <li class="divider"></li>
             <li><a class="menuitem" href="item4" tabindex="4">Item 4</a></li>
+            <li class="dropdown-header">This is a header</li>
+            <li><a class="menuitem" href="item5" tabindex="-1">Item 5</a></li>
         </ul>
     </div>
 

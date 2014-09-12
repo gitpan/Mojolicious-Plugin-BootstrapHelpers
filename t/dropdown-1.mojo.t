@@ -54,6 +54,8 @@ my $expected_dropdown_1_2 = qq{
             <li><a class="menuitem" href="item3" tabindex="-1" data-attr="7">Item 3</a></li>
             <li class="divider"></li>
             <li><a class="menuitem" href="item4" tabindex="4">Item 4</a></li>
+            <li class="dropdown-header">This is a header</li>
+            <li><a class="menuitem" href="item5" tabindex="-1">Item 5</a></li>
         </ul>
     </div>
 };
@@ -74,7 +76,7 @@ __DATA__
          items => [
             ['Item 1', ['item1'] ],
             ['Item 2', ['item2'] ],
-            divider,
+            [],
             ['Item 3', ['item3'] ]
          ] %>
 
@@ -86,9 +88,11 @@ __DATA__
          items => [
             ['Item 1', ['item1'], data => { attr => 2 } ],
             ['Item 2', ['item2'], data => { attr => 4 } ],
-            divider,
+            [],
             ['Item 3', ['item3'], data => { attr => 7 } ],
-            divider,
+            [],
             ['Item 4', ['item4'], tabindex => 4 ],
+            'This is a header',
+            ['Item 5', ['item5'] ],
          ] %>
 
