@@ -28,7 +28,7 @@ my $test = Test::Mojo::Trim->new;
 my $expected_dropdown_1_1 = qq{
     <div class="dropdown">
         <button class="btn btn-default dropdown-toggle" type="button" id="a_custom_id" data-toggle="dropdown">Dropdown 1</button>
-        <ul class="dropdown-menu">
+        <ul class="dropdown-menu dropdown-menu-right">
             <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
             <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
             <li class="divider"></li>
@@ -42,14 +42,14 @@ get '/dropdown_1_1' => 'dropdown_1_1';
 $test->get_ok('/dropdown_1_1')->status_is(200)->trimmed_content_is($expected_dropdown_1_1, 'Matched trimmed content in dropdown-1.mojo, line 1');
 
 
-#** test from dropdown-1.mojo, line 27
+#** test from dropdown-1.mojo, line 28
 
 my $expected_dropdown_1_2 = qq{
     <div class="dropdown">
-        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Dropdown 2<span class="caret"></span></button>
+        <button class="btn btn-lg btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Dropdown 2 <span class="caret"></span></button>
         <ul class="dropdown-menu">
             <li><a class="menuitem" href="item1" tabindex="-1" data-attr="2">Item 1</a></li>
-            <li><a class="menuitem" href="item2" tabindex="-1" data-attr="4">Item 2</a></li>
+            <li class="disabled"><a class="menuitem" href="item2" tabindex="-1" data-attr="4">Item 2</a></li>
             <li class="divider"></li>
             <li><a class="menuitem" href="item3" tabindex="-1" data-attr="7">Item 3</a></li>
             <li class="divider"></li>
@@ -62,7 +62,7 @@ my $expected_dropdown_1_2 = qq{
 
 get '/dropdown_1_2' => 'dropdown_1_2';
 
-$test->get_ok('/dropdown_1_2')->status_is(200)->trimmed_content_is($expected_dropdown_1_2, 'Matched trimmed content in dropdown-1.mojo, line 27');
+$test->get_ok('/dropdown_1_2')->status_is(200)->trimmed_content_is($expected_dropdown_1_2, 'Matched trimmed content in dropdown-1.mojo, line 28');
 
 done_testing();
 
@@ -71,8 +71,9 @@ __DATA__
 @@ dropdown_1_1.html.ep
 
 
-    <%= dropdown 'Dropdown 1',
-         button => [id => 'a_custom_id'],
+    <%= dropdown
+         button => ['Dropdown 1', id => 'a_custom_id'],
+         right,
          items => [
             ['Item 1', ['item1'] ],
             ['Item 2', ['item2'] ],
@@ -84,10 +85,11 @@ __DATA__
 @@ dropdown_1_2.html.ep
 
 
-    <%= dropdown 'Dropdown 2', caret,
+    <%= dropdown
+         button => ['Dropdown 2', caret, large, primary],
          items => [
             ['Item 1', ['item1'], data => { attr => 2 } ],
-            ['Item 2', ['item2'], data => { attr => 4 } ],
+            ['Item 2', ['item2'], disabled, data => { attr => 4 } ],
             [],
             ['Item 3', ['item3'], data => { attr => 7 } ],
             [],

@@ -1,5 +1,5 @@
 package Mojolicious::Plugin::BootstrapHelpers {
-$Mojolicious::Plugin::BootstrapHelpers::VERSION = '0.015.001';
+$Mojolicious::Plugin::BootstrapHelpers::VERSION = '0.016.000';
 use strict;
     use warnings;
     use true;
@@ -391,9 +391,8 @@ A submit button for use in forms. It overrides the build-in submit_button helper
 
 =head3 Syntax
 
-    <%= dropdown  $button_text,
-                  %has,
-                 (button => [ %button_has ],)
+    <%= dropdown  %has,
+                  button => [ $button_text, %button_has ],
                   items  => [
                       [ $itemtext, [ $url ], %item_has ],
                      ($headertext,)
@@ -402,13 +401,9 @@ A submit button for use in forms. It overrides the build-in submit_button helper
 
 Nesting is currently not supported.
 
-B<C<$button_text>>
+B<C<button =E<gt> []>>
 
-Mandatory. The text that appears on the menu opening button.
-
-B<C<caret>>
-
-It is a strapping. If it is used a caret (downward facing arrow) will be placed on the button.
+Mandatory array reference. Takes the same arguments as an ordinary L<button|/"Buttons">, with two exceptions: It can't take a url, and it can take the C<caret> strapping.
 
 B<C<items>>
 
@@ -451,8 +446,9 @@ C<caret> adds a C<E<lt>span class="caret"E<gt>E<lt>/span<E<gt>> element on the b
 =head3 Examples
 
 
-    <%= dropdown 'Dropdown 1',
-         button => [id => 'a_custom_id'],
+    <%= dropdown
+         button => ['Dropdown 1', id => 'a_custom_id'],
+         right,
          items => [
             ['Item 1', ['item1'] ],
             ['Item 2', ['item2'] ],
@@ -462,7 +458,7 @@ C<caret> adds a C<E<lt>span class="caret"E<gt>E<lt>/span<E<gt>> element on the b
 
     <div class="dropdown">
         <button class="btn btn-default dropdown-toggle" type="button" id="a_custom_id" data-toggle="dropdown">Dropdown 1</button>
-        <ul class="dropdown-menu">
+        <ul class="dropdown-menu dropdown-menu-right">
             <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
             <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
             <li class="divider"></li>
@@ -480,10 +476,11 @@ By default, <code>tabindex</code> is set to <code>-1</code>...
 =end html
 
 
-    <%= dropdown 'Dropdown 2', caret,
+    <%= dropdown
+         button => ['Dropdown 2', caret, large, primary],
          items => [
             ['Item 1', ['item1'], data => { attr => 2 } ],
-            ['Item 2', ['item2'], data => { attr => 4 } ],
+            ['Item 2', ['item2'], disabled, data => { attr => 4 } ],
             [],
             ['Item 3', ['item3'], data => { attr => 7 } ],
             [],
@@ -493,10 +490,10 @@ By default, <code>tabindex</code> is set to <code>-1</code>...
          ] %>
 
     <div class="dropdown">
-        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Dropdown 2<span class="caret"></span></button>
+        <button class="btn btn-lg btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Dropdown 2 <span class="caret"></span></button>
         <ul class="dropdown-menu">
             <li><a class="menuitem" href="item1" tabindex="-1" data-attr="2">Item 1</a></li>
-            <li><a class="menuitem" href="item2" tabindex="-1" data-attr="4">Item 2</a></li>
+            <li class="disabled"><a class="menuitem" href="item2" tabindex="-1" data-attr="4">Item 2</a></li>
             <li class="divider"></li>
             <li><a class="menuitem" href="item3" tabindex="-1" data-attr="7">Item 3</a></li>
             <li class="divider"></li>
