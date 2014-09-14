@@ -1,5 +1,5 @@
 package Mojolicious::Plugin::BootstrapHelpers {
-$Mojolicious::Plugin::BootstrapHelpers::VERSION = '0.016.000';
+$Mojolicious::Plugin::BootstrapHelpers::VERSION = '0.0161';
 use strict;
     use warnings;
     use true;
@@ -32,6 +32,7 @@ use strict;
         $app->helper($tp.'submit_button' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_submit);
         $app->helper($tp.'badge' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_badge);
         $app->helper($tp.'dropdown' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_dropdown);
+        $app->helper($tp.'buttongroup' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_buttongroup);
 
         if(exists $args->{'icons'}{'class'} && $args->{'icons'}{'formatter'}) {
             $app->config->{'Plugin::BootstrapHelpers'} = $args;

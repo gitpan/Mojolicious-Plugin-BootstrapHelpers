@@ -1,5 +1,5 @@
 package Mojolicious::Plugin::BootstrapHelpers::Helpers {
-$Mojolicious::Plugin::BootstrapHelpers::Helpers::VERSION = '0.016.000';
+$Mojolicious::Plugin::BootstrapHelpers::Helpers::VERSION = '0.0161';
 use strict;
     use warnings;
     use Mojo::Base 'Mojolicious::Plugin';
@@ -227,6 +227,43 @@ use strict;
 
         my $tag = qq{<li$lihtml><a$html>$item_text</a></li>};
 
+        return out($tag);
+    }
+
+    sub bootstrap_buttongroup {
+        my $c = shift;
+        my $attr = parse_attributes(@_);
+        my $buttons_info = delete $attr->{'buttons'};
+        my $buttongroups_info = delete $attr->{'buttongroups'};
+        $attr = add_classes($attr, 'btn-group', { size => 'btn-group-%s' });
+        my $html = htmlify_attrs($attr);
+
+        my $buttons = '';
+        foreach my $button ($buttons_info->@*) {
+            $buttons .= bootstrap_button($c, $button->@*, type => 'button');
+        }
+        my $buttongroups = '';
+        foreach my $buttongroup ($buttongroups_info->@*) {
+            $buttongroups .= bootstrap_buttongroup($c, $buttongroup->@*);
+        }
+
+        my $tag = '';
+
+        # Nested groups
+        if(scalar $buttongroups_info->@*) {
+            $tag = qq{
+                <div$html>
+                    $buttongroups
+                </div>
+            };
+        }
+        else {
+            $tag = qq{
+                <div$html>
+                    $buttons
+                </div>
+            };
+        }
         return out($tag);
     }
 
