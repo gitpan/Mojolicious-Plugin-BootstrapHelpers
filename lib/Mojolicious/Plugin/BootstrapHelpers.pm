@@ -1,5 +1,5 @@
 package Mojolicious::Plugin::BootstrapHelpers {
-$Mojolicious::Plugin::BootstrapHelpers::VERSION = '0.0161';
+$Mojolicious::Plugin::BootstrapHelpers::VERSION = '0.0170';
 use strict;
     use warnings;
     use true;
@@ -388,6 +388,112 @@ A submit button for use in forms. It overrides the build-in submit_button helper
 
 
 
+
+=head2 Button groups
+
+=head3 Syntax
+
+    <%= buttongroup %has,
+                    buttons => [
+                        [ $button_text, %button_has ],
+                        {
+                            button => [ $button_text, %button_has ],
+                            items => [
+                                [ $itemtext, [ $url ], %item_has ],
+                               ($headertext,)
+                               ([],)
+                            ]
+                        }
+                    ]
+    %>
+
+B<C<buttons =E<gt> []>>
+
+Mandatory array reference. Takes a list of child elements of two different types:
+
+=over 4
+
+B<C<[ $button_text, %button_has ]>>
+
+Array references are (and take the same arguments as) ordinary L<buttons|/"Buttons">. Two exceptions: It can't take a url, and it can take the C<caret> strapping.
+
+B<C<{ ... }>>
+
+Hash references are nested L<dropdowns|/"Dropdowns">. Read more there.
+
+=back
+
+=head3 Examples
+
+
+    <%= buttongroup
+        buttons => [
+            ['Button 1'],
+            ['Button 2'],
+            ['Button 3'],
+        ]
+    %>
+
+    <div class="btn-group">
+        <button class="btn btn-default" type="button">Button 1</button>
+        <button class="btn btn-default" type="button">Button 2</button>
+        <button class="btn btn-default" type="button">Button 3</button>
+    </div>
+
+=begin html
+
+<p>
+A basic button group.
+
+</p>
+
+=end html
+
+
+    <%= buttongroup small,
+        buttons => [
+            ['Button 1'],
+            { button => ['Dropdown 1', caret],
+              items => [
+                  ['Item 1', ['item1'] ],
+                  ['Item 2', ['item2'] ],
+                  [],
+                  ['Item 3', ['item3'] ],
+              ],
+            },
+            ['Button 2'],
+            ['Button 3'],
+        ],
+    %>
+
+    <div class="btn-group btn-group-sm">
+        <button class="btn btn-default" type="button">Button 1</button>
+        <div class="btn-group btn-group-sm">
+            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Dropdown 1 <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
+                <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
+                <li class="divider"></li>
+                <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>
+            </ul>
+        </div>
+        <button class="btn btn-default" type="button">Button 2</button>
+        <button class="btn btn-default" type="button">Button 3</button>
+    </div>
+
+=begin html
+
+<p>
+Nested button group. Note that the <code>small</code> strapping is only necessary once. The same classes are automatically applied to the nested <code>.btn-group</code>.
+</p>
+
+=end html
+
+
+
+
+
 =head2 Dropdowns
 
 =head3 Syntax
@@ -399,8 +505,6 @@ A submit button for use in forms. It overrides the build-in submit_button helper
                      ($headertext,)
                      ([],)
                   ]
-
-Nesting is currently not supported.
 
 B<C<button =E<gt> []>>
 
