@@ -1,6 +1,6 @@
-package Mojolicious::Plugin::BootstrapHelpers {
-$Mojolicious::Plugin::BootstrapHelpers::VERSION = '0.0170';
-use strict;
+package Mojolicious::Plugin::BootstrapHelpers 0.0171 {
+
+    use strict;
     use warnings;
     use true;
 
@@ -43,7 +43,7 @@ use strict;
             my @sizes = qw/xsmall small medium large/;
             my @contexts = qw/default active primary success info warning danger/;
             my @table = qw/striped bordered hover condensed responsive/;
-            my @direction = qw/right block/;
+            my @direction = qw/right block vertical justified dropup/;
             my @menu = qw/caret/;
             my @misc = qw/disabled/;
 
@@ -82,14 +82,13 @@ Mojolicious::Plugin::BootstrapHelpers - Type less bootstrap
     plugin 'BootstrapHelpers';
 
     # Meanwhile, somewhere in a template...
-    %= formgroup 'Email' => text_field => ['email-address', cols => { medium => [3, 9] } ], large
+    %= formgroup 'Email', text_field => ['email'], large, cols => { small => [3, 9] }
 
     # ...that renders into
     <div class="form-group form-group-lg">
-        <label class="control-label" for="email-address">Email</label>
-        <div class="input-group">
-            <span class="input-group-addon">@</span>
-            <input class="form-control" id="email-address" name="email_address" type="text" />
+        <label class="control-label col-sm-3" for="email">Email</label>
+        <div class="col-sm-9">
+            <input class="form-control" id="email" name="email" type="text">
         </div>
     </div>
 
@@ -346,7 +345,7 @@ C<disabled> applies the C<.disabled> class if the generated element is an C<E<lt
 
     %= button 'The example 5' => large, warning
 
-    <button class="btn btn-lg btn-warning">The example 5</button>
+    <button class="btn btn-lg btn-warning" type="button">The example 5</button>
 
 =begin html
 
@@ -393,6 +392,9 @@ A submit button for use in forms. It overrides the build-in submit_button helper
 
 =head3 Syntax
 
+There are two different syntaxes. One for single-button dropdowns and one for multi-button dropdowns.
+
+    # multi button
     <%= buttongroup %has,
                     buttons => [
                         [ $button_text, %button_has ],
@@ -407,19 +409,32 @@ A submit button for use in forms. It overrides the build-in submit_button helper
                     ]
     %>
 
+    # single button
+    <%= buttongroup {
+                        button => [ $button_text, %button_has ],
+                        items => [
+                            [ $itemtext, [ $url ], %item_has ],
+                           ($headertext,)
+                           ([],)
+                        ]
+                    }
+    %>
+
 B<C<buttons =E<gt> []>>
 
-Mandatory array reference. Takes a list of child elements of two different types:
+Single-button: Not available. Multi-button: Mandatory array reference. Takes a list of child elements of two different types:
 
 =over 4
 
 B<C<[ $button_text, %button_has ]>>
 
-Array references are (and take the same arguments as) ordinary L<buttons|/"Buttons">. Two exceptions: It can't take a url, and it can take the C<caret> strapping.
+Single-button: Not available. Multi-button: Array references are (and take the same arguments as) ordinary L<buttons|/"Buttons">. Two exceptions: It can't take a url, and it can take the C<caret> strapping.
 
 B<C<{ ... }>>
 
 Hash references are nested L<dropdowns|/"Dropdowns">. Read more there.
+
+For the single-button dropdown, this is the only argument.
 
 =back
 
@@ -486,6 +501,179 @@ A basic button group.
 
 <p>
 Nested button group. Note that the <code>small</code> strapping is only necessary once. The same classes are automatically applied to the nested <code>.btn-group</code>.
+
+</p>
+
+=end html
+
+
+    <%= buttongroup vertical,
+        buttons => [
+            ['Button 1'],
+            { button => ['Dropdown 1', caret],
+              items => [
+                  ['Item 1', ['item1'] ],
+                  ['Item 2', ['item2'] ],
+                  [],
+                  ['Item 3', ['item3'] ],
+              ],
+            },
+            ['Button 2'],
+            ['Button 3'],
+        ],
+    %>
+
+    <div class="btn-group-vertical">
+        <button class="btn btn-default" type="button">Button 1</button>
+        <div class="btn-group">
+            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Dropdown 1 <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
+                <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
+                <li class="divider"></li>
+                <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>
+            </ul>
+        </div>
+        <button class="btn btn-default" type="button">Button 2</button>
+        <button class="btn btn-default" type="button">Button 3</button>
+    </div>
+
+=begin html
+
+<p>
+Nested button group, with the <code>vertical</code> strapping.
+
+</p>
+
+=end html
+
+
+    <%= buttongroup justified,
+        buttons => [
+            ['Link 1', ['http://www.example.com/'] ],
+            ['Link 2', ['http://www.example.com/'] ],
+            { dropup,
+              button => ['Dropup 1', caret],
+              items => [
+                  ['Item 1', ['item1'] ],
+                  ['Item 2', ['item2'] ],
+                  [],
+                  ['Item 3', ['item3'] ],
+              ],
+            },
+        ]
+    %>
+
+    <div class="btn-group btn-group-justified">
+        <a class="btn btn-default" href="http://www.example.com/">Link 1</a>
+        <a class="btn btn-default" href="http://www.example.com/">Link 2</a>
+        <div class="btn-group dropup">
+            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Dropup 1 <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
+                <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
+                <li class="divider"></li>
+                <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>
+            </ul>
+        </div>
+    </div>
+
+=begin html
+
+<p>
+Mix links and <code>dropup</code> menus in <code>justified</code> button groups.
+
+</p>
+
+=end html
+
+
+    <%= buttongroup
+        buttons => [
+            ['Link 1', ['http://www.example.com/'] ],
+            { button => [undef, caret],
+              items => [
+                  ['Item 1', ['item1'] ],
+                  ['Item 2', ['item2'] ],
+                  [],
+                  ['Item 3', ['item3'] ],
+              ],
+            },
+        ]
+    %>
+
+    <div class="btn-group">
+        <a class="btn btn-default" href="http://www.example.com/">Link 1</a>
+        <div class="btn-group">
+            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown"><span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
+                <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
+                <li class="divider"></li>
+                <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>
+            </ul>
+        </div>
+    </div>
+
+=begin html
+
+<p>
+Split button dropdowns uses the same syntax as any other multi-button dropdown. Set the <code>caret</code> button title to <code>undef</code>.
+
+</p>
+
+=end html
+
+
+    <%= buttongroup { button => ['Default', caret],
+                      items  => [
+                          ['Item 1', ['item1'] ],
+                          ['Item 2', ['item2'] ],
+                          [],
+                          ['Item 3', ['item3'] ],
+                      ],
+                    }
+    %>
+
+    <%= buttongroup { button => ['Big danger', caret, large, danger],
+                      items  => [
+                          ['Item 1', ['item1'] ],
+                          ['Item 2', ['item2'] ],
+                          [],
+                          ['Item 3', ['item3'] ],
+                      ],
+                    }
+    %>
+
+    <div class="btn-group">
+        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Default <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
+            <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
+            <li class="divider"></li>
+            <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>
+        </ul>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn btn-danger btn-lg dropdown-toggle" type="button" data-toggle="dropdown">Big danger <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
+            <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
+            <li class="divider"></li>
+            <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>
+        </ul>
+    </div>
+
+=begin html
+
+<p>
+Using the shortcut to create single-button button group dropdowns.
 </p>
 
 =end html
@@ -693,6 +881,23 @@ Optional. If you prefer you can set C<value> in C<%input_has> instead. (But don'
 =head3 Examples
 
 
+    %= formgroup 'Text test 1', text_field => ['test_text']
+
+    <div class="form-group">
+        <label class="control-label" for="test_text">Text test 1</label>
+        <input class="form-control" id="test_text" name="test_text" type="text" />
+    </div>
+
+=begin html
+
+<p>
+The first item in the array ref is used for both <code>id</code> and <code>name</code>. Except...
+
+</p>
+
+=end html
+
+
     %= formgroup 'Text test 4', text_field => ['test-text', large]
 
     <div class="form-group">
@@ -704,6 +909,67 @@ Optional. If you prefer you can set C<value> in C<%input_has> instead. (But don'
 
 <p>
 ...if the input name (the first item in the text_field array ref) contains dashes -- those are replaced (in the <code>name</code>) to underscores.
+
+</p>
+
+=end html
+
+
+    %= formgroup 'Text test 5', text_field => ['test_text', '200' ]
+
+    <div class="form-group">
+        <label class="control-label" for="test_text">Text test 5</label>
+        <input class="form-control" id="test_text" name="test_text" type="text" value="200" />
+    </div>
+
+=begin html
+
+<p>
+An input with a value.
+
+</p>
+
+=end html
+
+
+    <form class="form-horizontal">
+        %= formgroup 'Text test 6', text_field => ['test_text'], large, cols => { small => [2, 10] }
+    </form>
+
+    <form class="form-horizontal">
+        <div class="form-group form-group-lg">
+            <label class="control-label col-sm-2" for="test_text">Text test 6</label>
+            <div class="col-sm-10">
+                <input class="form-control" id="test_text" name="test_text" type="text">
+            </div>
+        </div>
+    </form>
+
+=begin html
+
+<p>
+Note the difference with the earlier example. Here <code>large</code> is outside the <code>text_field</code> array reference, and therefore <code>.form-group-lg</code> is applied to the form group.
+
+</p>
+
+=end html
+
+
+    %= formgroup 'Text test 8', text_field => ['test_text'], cols => { medium => [2, 10], small => [4, 8] }
+
+    <div class="form-group">
+        <label class="control-label col-md-2 col-sm-4" for="test_text">Text test 8</label>
+        <div class="col-md-10 col-sm-8">
+            <input class="form-control" id="test_text" name="test_text" type="text" />
+        </div>
+    </div>
+
+=begin html
+
+<p>
+A formgroup used in a <code>.form-horizontal</code> <code>form</code>.
+
+(Note that in this context, <code>medium</code> and <code>large</code> are not short form strappings. Those don't take arguments.)
 
 </p>
 

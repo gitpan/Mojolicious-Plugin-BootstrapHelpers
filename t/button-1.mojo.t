@@ -26,7 +26,7 @@ my $test = Test::Mojo::Trim->new;
 #** test from button-1.mojo, line 1
 
 my $expected_button_1_1 = qq{
-    <button class="btn btn-lg btn-warning">The example 5</button>
+    <button class="btn btn-lg btn-warning" type="button">The example 5</button>
 };
 
 get '/button_1_1' => 'button_1_1';
@@ -92,7 +92,7 @@ $test->get_ok('/button_1_6')->status_is(200)->trimmed_content_is($expected_butto
 #** test from button-1.mojo, line 61
 
 my $expected_button_1_7 = qq{
-    <button class="btn btn-default">The example 4</button>
+    <button class="btn btn-default" type="button">The example 4</button>
 };
 
 get '/button_1_7' => 'button_1_7';
@@ -125,7 +125,7 @@ $test->get_ok('/button_1_9')->status_is(200)->trimmed_content_is($expected_butto
 #** test from button-1.mojo, line 93, loop: active
 
 my $expected_button_1_10_active_active = qq{
-    <button class="active btn btn-default">Loop</button>
+    <button class="active btn btn-default" type="button">Loop</button>
 };
 
 get '/button_1_10_active' => 'button_1_10_active';
@@ -136,7 +136,7 @@ $test->get_ok('/button_1_10_active')->status_is(200)->trimmed_content_is($expect
 #** test from button-1.mojo, line 93, loop: block
 
 my $expected_button_1_10_block_block = qq{
-    <button class="block btn btn-default">Loop</button>
+    <button class="block btn btn-default" type="button">Loop</button>
 };
 
 get '/button_1_10_block' => 'button_1_10_block';

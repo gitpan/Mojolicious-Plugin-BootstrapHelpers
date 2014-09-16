@@ -1,5 +1,19 @@
 Revision history for Mojolicious-Plugin-BootstrapHelpers
 
+0.0171 2014-09-16T23:11:42Z CEST
+ [Documentation]
+ - Synopsis contained a partially deprecated example.
+
+ [Enhancements]
+ - Added 'vertical' strapping to button group.
+ - Added 'justified' strapping to button group.
+ - Added 'dropup' strapping to nested button groups.
+ - Added shortcut to create a single button dropdown.
+ - Added type="button" to all buttons that should have it.
+
+ [Meta]
+ - Use DZP::PkgVersion::Block.
+
 0.0170 2014-09-15T20:44:29Z CEST
  [Enhancements]
  - Added button group support (also supports nested groups)

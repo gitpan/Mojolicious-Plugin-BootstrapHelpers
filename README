@@ -9,14 +9,13 @@ SYNOPSIS
         plugin 'BootstrapHelpers';
 
         # Meanwhile, somewhere in a template...
-        %= formgroup 'Email' => text_field => ['email-address', cols => { medium => [3, 9] } ], large
+        %= formgroup 'Email', text_field => ['email'], large, cols => { small => [3, 9] }
 
         # ...that renders into
         <div class="form-group form-group-lg">
-            <label class="control-label" for="email-address">Email</label>
-            <div class="input-group">
-                <span class="input-group-addon">@</span>
-                <input class="form-control" id="email-address" name="email_address" type="text" />
+            <label class="control-label col-sm-3" for="email">Email</label>
+            <div class="col-sm-9">
+                <input class="form-control" id="email" name="email" type="text">
             </div>
         </div>
 
@@ -241,7 +240,7 @@ HELPERS
    Examples
         %= button 'The example 5' => large, warning
 
-        <button class="btn btn-lg btn-warning">The example 5</button>
+        <button class="btn btn-lg btn-warning" type="button">The example 5</button>
 
         %= button 'The example 1' => ['http://www.example.com/'], small
 
@@ -253,6 +252,10 @@ HELPERS
 
   Button groups
    Syntax
+    There are two different syntaxes. One for single-button dropdowns and
+    one for multi-button dropdowns.
+
+        # multi button
         <%= buttongroup %has,
                         buttons => [
                             [ $button_text, %button_has ],
@@ -267,20 +270,33 @@ HELPERS
                         ]
         %>
 
+        # single button
+        <%= buttongroup {
+                            button => [ $button_text, %button_has ],
+                            items => [
+                                [ $itemtext, [ $url ], %item_has ],
+                               ($headertext,)
+                               ([],)
+                            ]
+                        }
+        %>
+
     "buttons => []"
 
-    Mandatory array reference. Takes a list of child elements of two
-    different types:
+    Single-button: Not available. Multi-button: Mandatory array reference.
+    Takes a list of child elements of two different types:
 
         "[ $button_text, %button_has ]"
 
-        Array references are (and take the same arguments as) ordinary
-        buttons. Two exceptions: It can't take a url, and it can take the
-        "caret" strapping.
+        Single-button: Not available. Multi-button: Array references are
+        (and take the same arguments as) ordinary buttons. Two exceptions:
+        It can't take a url, and it can take the "caret" strapping.
 
         "{ ... }"
 
         Hash references are nested dropdowns. Read more there.
+
+        For the single-button dropdown, this is the only argument.
 
    Examples
         <%= buttongroup
@@ -327,6 +343,139 @@ HELPERS
             </div>
             <button class="btn btn-default" type="button">Button 2</button>
             <button class="btn btn-default" type="button">Button 3</button>
+        </div>
+
+        <%= buttongroup vertical,
+            buttons => [
+                ['Button 1'],
+                { button => ['Dropdown 1', caret],
+                  items => [
+                      ['Item 1', ['item1'] ],
+                      ['Item 2', ['item2'] ],
+                      [],
+                      ['Item 3', ['item3'] ],
+                  ],
+                },
+                ['Button 2'],
+                ['Button 3'],
+            ],
+        %>
+
+        <div class="btn-group-vertical">
+            <button class="btn btn-default" type="button">Button 1</button>
+            <div class="btn-group">
+                <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Dropdown 1 <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
+                    <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
+                    <li class="divider"></li>
+                    <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>
+                </ul>
+            </div>
+            <button class="btn btn-default" type="button">Button 2</button>
+            <button class="btn btn-default" type="button">Button 3</button>
+        </div>
+
+        <%= buttongroup justified,
+            buttons => [
+                ['Link 1', ['http://www.example.com/'] ],
+                ['Link 2', ['http://www.example.com/'] ],
+                { dropup,
+                  button => ['Dropup 1', caret],
+                  items => [
+                      ['Item 1', ['item1'] ],
+                      ['Item 2', ['item2'] ],
+                      [],
+                      ['Item 3', ['item3'] ],
+                  ],
+                },
+            ]
+        %>
+
+        <div class="btn-group btn-group-justified">
+            <a class="btn btn-default" href="http://www.example.com/">Link 1</a>
+            <a class="btn btn-default" href="http://www.example.com/">Link 2</a>
+            <div class="btn-group dropup">
+                <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Dropup 1 <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
+                    <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
+                    <li class="divider"></li>
+                    <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <%= buttongroup
+            buttons => [
+                ['Link 1', ['http://www.example.com/'] ],
+                { button => [undef, caret],
+                  items => [
+                      ['Item 1', ['item1'] ],
+                      ['Item 2', ['item2'] ],
+                      [],
+                      ['Item 3', ['item3'] ],
+                  ],
+                },
+            ]
+        %>
+
+        <div class="btn-group">
+            <a class="btn btn-default" href="http://www.example.com/">Link 1</a>
+            <div class="btn-group">
+                <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown"><span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
+                    <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
+                    <li class="divider"></li>
+                    <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <%= buttongroup { button => ['Default', caret],
+                          items  => [
+                              ['Item 1', ['item1'] ],
+                              ['Item 2', ['item2'] ],
+                              [],
+                              ['Item 3', ['item3'] ],
+                          ],
+                        }
+        %>
+
+        <%= buttongroup { button => ['Big danger', caret, large, danger],
+                          items  => [
+                              ['Item 1', ['item1'] ],
+                              ['Item 2', ['item2'] ],
+                              [],
+                              ['Item 3', ['item3'] ],
+                          ],
+                        }
+        %>
+
+        <div class="btn-group">
+            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Default <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
+                <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
+                <li class="divider"></li>
+                <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>
+            </ul>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-danger btn-lg dropdown-toggle" type="button" data-toggle="dropdown">Big danger <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
+                <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
+                <li class="divider"></li>
+                <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>
+            </ul>
         </div>
 
   Dropdowns
@@ -492,11 +641,47 @@ HELPERS
         (But don't do both for the same field.)
 
    Examples
+        %= formgroup 'Text test 1', text_field => ['test_text']
+
+        <div class="form-group">
+            <label class="control-label" for="test_text">Text test 1</label>
+            <input class="form-control" id="test_text" name="test_text" type="text" />
+        </div>
+
         %= formgroup 'Text test 4', text_field => ['test-text', large]
 
         <div class="form-group">
             <label class="control-label" for="test-text">Text test 4</label>
             <input class="form-control input-lg" id="test-text" name="test_text" type="text" />
+        </div>
+
+        %= formgroup 'Text test 5', text_field => ['test_text', '200' ]
+
+        <div class="form-group">
+            <label class="control-label" for="test_text">Text test 5</label>
+            <input class="form-control" id="test_text" name="test_text" type="text" value="200" />
+        </div>
+
+        <form class="form-horizontal">
+            %= formgroup 'Text test 6', text_field => ['test_text'], large, cols => { small => [2, 10] }
+        </form>
+
+        <form class="form-horizontal">
+            <div class="form-group form-group-lg">
+                <label class="control-label col-sm-2" for="test_text">Text test 6</label>
+                <div class="col-sm-10">
+                    <input class="form-control" id="test_text" name="test_text" type="text">
+                </div>
+            </div>
+        </form>
+
+        %= formgroup 'Text test 8', text_field => ['test_text'], cols => { medium => [2, 10], small => [4, 8] }
+
+        <div class="form-group">
+            <label class="control-label col-md-2 col-sm-4" for="test_text">Text test 8</label>
+            <div class="col-md-10 col-sm-8">
+                <input class="form-control" id="test_text" name="test_text" type="text" />
+            </div>
         </div>
 
   Icons
