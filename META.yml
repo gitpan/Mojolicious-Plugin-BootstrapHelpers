@@ -4,6 +4,7 @@ author:
   - 'Erik Carlsson <csson@cpan.org>'
 build_requires:
   Dist::Zilla::Plugin::InsertExample::FromMojoTemplates: v0.2.0
+  Dist::Zilla::Plugin::PkgVersion::Block: '0.0101'
   Dist::Zilla::Plugin::Test::CreateFromMojoTemplates: '0.05'
   Test::EOL: '1.5'
   Test::Mojo::Trim: '0.03'
@@ -38,6 +39,6 @@ resources:
   bugtracker: https://github.com/Csson/p5-mojolicious-plugin-bootstraphelpers/issues
   homepage: https://github.com/Csson/p5-mojolicious-plugin-bootstraphelpers
   repository: https://github.com/Csson/p5-mojolicious-plugin-bootstraphelpers.git
-version: '0.0171'
+version: '0.0172'
 x_contributors:
   - 'Erik Carlsson <info@code301.com>'

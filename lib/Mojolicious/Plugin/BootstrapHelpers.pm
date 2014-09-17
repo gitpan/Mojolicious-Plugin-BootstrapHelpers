@@ -1,4 +1,4 @@
-package Mojolicious::Plugin::BootstrapHelpers 0.0171 {
+package Mojolicious::Plugin::BootstrapHelpers 0.0172 {
 
     use strict;
     use warnings;
@@ -33,6 +33,8 @@ package Mojolicious::Plugin::BootstrapHelpers 0.0171 {
         $app->helper($tp.'badge' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_badge);
         $app->helper($tp.'dropdown' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_dropdown);
         $app->helper($tp.'buttongroup' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_buttongroup);
+        $app->helper($tp.'toolbar' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_toolbar);
+        $app->helper($tp.'input' => \&Mojolicious::Plugin::BootstrapHelpers::Helpers::bootstrap_input);
 
         if(exists $args->{'icons'}{'class'} && $args->{'icons'}{'formatter'}) {
             $app->config->{'Plugin::BootstrapHelpers'} = $args;
@@ -211,6 +213,10 @@ In the syntax sections below the following conventions are used:
                       key => { key2 => $value, key3 => 'othervalue' }
     (...)           Anything between parenthesis is optional. The parenthesis is not part of the
                       actual syntax
+    |...|           Two pipes is a reference to another specification. For instance, button toolbars contain
+                      button groups that contain buttons. Using this syntax makes the important parts clearer.
+                      The pipes are not part of the actual syntax.
+
 
 Ordering between two hashes that follows each other is also not significant.
 
@@ -397,9 +403,9 @@ There are two different syntaxes. One for single-button dropdowns and one for mu
     # multi button
     <%= buttongroup %has,
                     buttons => [
-                        [ $button_text, %button_has ],
+                        [ |button| ],
                         {
-                            button => [ $button_text, %button_has ],
+                            button => [ |button| ],
                             items => [
                                 [ $itemtext, [ $url ], %item_has ],
                                ($headertext,)
@@ -411,7 +417,7 @@ There are two different syntaxes. One for single-button dropdowns and one for mu
 
     # single button
     <%= buttongroup {
-                        button => [ $button_text, %button_has ],
+                        button => [ |button| ],
                         items => [
                             [ $itemtext, [ $url ], %item_has ],
                            ($headertext,)
@@ -426,7 +432,7 @@ Single-button: Not available. Multi-button: Mandatory array reference. Takes a l
 
 =over 4
 
-B<C<[ $button_text, %button_has ]>>
+B<C<[ |button| ]>>
 
 Single-button: Not available. Multi-button: Array references are (and take the same arguments as) ordinary L<buttons|/"Buttons">. Two exceptions: It can't take a url, and it can take the C<caret> strapping.
 
@@ -682,12 +688,62 @@ Using the shortcut to create single-button button group dropdowns.
 
 
 
+=head2 Button toolbars
+
+=head3 Syntax
+
+    <%= toolbar %toolbar_has,
+                groups => [
+                    { |button_group| }
+                ]
+    %>
+
+B<C<groups =E<gt> [ { |button_group| } ]>>
+
+A mandatory array reference of L<button groups|/"Button-groups">.
+
+=head3 Examples
+
+
+    <%= toolbar id => 'my-toolbar',
+                groups => [
+                    { buttons => [
+                        ['Button 1'],
+                        ['Button 2'],
+                        ['Button 3'],
+                      ],
+                    },
+                    { buttons => [
+                        ['Button 4', primary],
+                        ['Button 5'],
+                        ['Button 6'],
+                      ],
+                    },
+                ]
+    %>
+
+    <div class="btn-toolbar" id="my-toolbar">
+        <div class="btn-group">
+            <button class="btn btn-default" type="button">Button 1</button>
+            <button class="btn btn-default" type="button">Button 2</button>
+            <button class="btn btn-default" type="button">Button 3</button>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-primary" type="button">Button 4</button>
+            <button class="btn btn-default" type="button">Button 5</button>
+            <button class="btn btn-default" type="button">Button 6</button>
+        </div>
+    </div>
+
+
+
+
 =head2 Dropdowns
 
 =head3 Syntax
 
     <%= dropdown  %has,
-                  button => [ $button_text, %button_has ],
+                  button => [ |button| ],
                   items  => [
                       [ $itemtext, [ $url ], %item_has ],
                      ($headertext,)
@@ -719,6 +775,7 @@ B<C<$url>>
 Mandatory. It sets the C<href> on the link. L<url_for|Mojolicious::Controller#url_for> is used to create the link.
 
 =back
+
 
 B<C<$headertext>>
 
@@ -998,6 +1055,193 @@ Mandatory. The specific icon you wish to create. Possible values depends on your
 
     <span class="glyphicon glyphicon-copyright-mark"></span>
     <span class="glyphicon glyphicon-sort-by-attributes-alt"></span>
+
+
+
+
+
+=head2 Input groups
+
+=head3 Syntax
+
+    <%= input %has,
+              (prepend => ...,)
+              input => { |input_field| },
+              (append => ...)
+    %>
+
+B<C<input =E<gt> { }>>
+
+Mandatory hash reference. The content is handed off to L<input_tag|Mojolicious::Plugin::TagHelpers/"input_tag"> in L<Mojolicious::Plugin::TagHelpers>.
+
+B<C<prepend> and C<append>>
+
+Both are optional, but input groups don't make sense if neither is present. They take the same arguments, but there are a few to choose from:
+
+=over 4
+
+B<C<prepend =E<gt> $string>>
+
+B<C<prepend =E<gt> { check_box =E<gt> [ |check_box| ] }>>
+
+Creates a checkbox by giving its content to L<check_box|Mojolicious::Plugin::TagHelpers/"check_box"> in L<Mojolicious::Plugin::TagHelpers>.
+
+B<C<prepend =E<gt> { radio_button =E<gt> [ |radio_button| ] }>>
+
+Creates a radiobutton by giving its content to L<radio_button|Mojolicious::Plugin::TagHelpers/"radio_button"> in L<Mojolicious::Plugin::TagHelpers>.
+
+B<C<prepend =E<gt> { buttongroup =E<gt> { |buttongroup| }>>
+
+Creates a single button buttongroup. See L<button_groups|/"Button_groups"> for details.
+
+B<C<prepend =E<gt> { buttongroup =E<gt> [ |buttongroup| ]>>
+
+Creates a multi button buttongroup. See L<button_groups|/"Button_groups"> for details.
+
+=back
+
+=head3 Examples
+
+
+    <%= input input => { text_field => ['username'] },
+              prepend => { check_box => ['agreed'] }
+    %>
+
+    <div class="input-group">
+        <span class="input-group-addon"><input name="agreed" type="checkbox" /></span>
+        <input class="form-control" id="username" type="text" name="username" />
+    </div>
+
+=begin html
+
+<p>
+An input group with a checkbox.
+
+</p>
+
+=end html
+
+
+    <%= input large,
+              prepend => { radio_button => ['yes'] },
+              input => { text_field => ['username'] },
+              append => '@'
+    %>
+
+    <div class="input-group input-group-lg">
+        <span class="input-group-addon"><input name="yes" type="radio" /></span>
+        <input class="form-control" id="username" type="text" name="username" />
+        <span class="input-group-addon">@</span>
+    </div>
+
+=begin html
+
+<p>
+A <code>large</code> input group with a radio button prepended and a string appended.
+
+</p>
+
+=end html
+
+
+    <%= input input => { text_field => ['username'] },
+              append => { button => ['Click me!'] },
+    %>
+
+    <div class="input-group">
+        <input class="form-control" id="username" type="text" name="username" />
+        <span class="input-group-btn"><button class="btn btn-default" type="button">Click me!</button></span>
+    </div>
+
+=begin html
+
+<p>
+An input group with a button.
+
+</p>
+
+=end html
+
+
+    <%= input input  => { text_field => ['username'] },
+              append => { buttongroup => {
+                              right,
+                              button => ['The button', caret],
+                              items  => [
+                                  ['Item 1', ['item1'] ],
+                                  ['Item 2', ['item2'] ],
+                                  [],
+                                  ['Item 3', ['item3'] ],
+                              ],
+                          }
+                        }
+    %>
+
+    <div class="input-group">
+        <input class="form-control" id="username" type="text" name="username" />
+        <div class="input-group-btn">
+            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">The button <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right">
+                <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
+                <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
+                <li class="divider"></li>
+                <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>
+            </ul>
+        </div>
+    </div>
+
+=begin html
+
+<p>
+An input group with a button dropdown appended. Note that <code>right</code> is manually applied.
+
+</p>
+
+=end html
+
+
+    <%= input input   => { text_field => ['username'] },
+              prepend => { buttongroup => [
+                              buttons => [
+                                ['Link 1', ['http://www.example.com/'] ],
+                                { button => [undef, caret],
+                                  items => [
+                                      ['Item 1', ['item1'] ],
+                                      ['Item 2', ['item2'] ],
+                                      [],
+                                      ['Item 3', ['item3'] ],
+                                  ],
+                               },
+                            ],
+                         ],
+                      },
+    %>
+
+    <div class="input-group">
+        <div class="input-group-btn">
+            <a class="btn btn-default" href="http://www.example.com/">Link 1</a>
+            <div class="btn-group">
+                <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown"><span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
+                    <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
+                    <li class="divider"></li>
+                    <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>
+                </ul>
+            </div>
+        </div>
+        <input class="form-control" id="username" type="text" name="username" />
+    </div>
+
+=begin html
+
+<p>
+An input group with a split button dropdown prepended.
+</p>
+
+=end html
 
 
 
