@@ -1,5 +1,14 @@
 Revision history for Mojolicious-Plugin-BootstrapHelpers
 
+0.0173 2014-09-19T23:50:31Z CEST
+ [Documentation]
+ - Fixed some internal links.
+ - Fixed pod typo under init_short_strappings.
+
+ [Enhancements]
+ - Support for nav pills and nav tabs (undocumented)
+ - Partial support for navbar (also undocumented)
+
 0.0172 2014-09-17T22:51:58Z CEST
  [API Changes]
  - Actually removed input-group behaviour from form-group (it had already

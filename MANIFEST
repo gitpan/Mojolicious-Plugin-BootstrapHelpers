@@ -16,6 +16,8 @@ examples/dropdown-1.mojo.html
 examples/formgroup-1.mojo.html
 examples/icon-1.mojo.html
 examples/input_group-1.mojo.html
+examples/nav-1.mojo.html
+examples/navbar-1.mojo.html
 examples/panel-1.mojo.html
 examples/table-1.mojo.html
 examples/toolbar-1.mojo.html
@@ -30,6 +32,8 @@ t/dropdown-1.mojo.t
 t/formgroup-1.mojo.t
 t/icon-1.mojo.t
 t/input_group-1.mojo.t
+t/nav-1.mojo.t
+t/navbar-1.mojo.t
 t/panel-1.mojo.t
 t/release-pod-syntax.t
 t/table-1.mojo.t
