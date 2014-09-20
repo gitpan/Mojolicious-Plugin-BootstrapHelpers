@@ -42,7 +42,7 @@ $test->get_ok('/nav_1_1')->status_is(200)->trimmed_content_is($expected_nav_1_1,
 #** test from nav-1.mojo, line 20
 
 my $expected_nav_1_2 = qq{
-    <ul class="nav nav-justified nav-tabs">
+    <ul class="nav nav-justified nav-tabs" id="my-nav">
         <li><a href="#">Item 1</a></li>
         <li class="active"><a href="#">Item 2</a></li>
         <li><a href="#">Item 3</a></li>
@@ -81,7 +81,7 @@ __DATA__
 @@ nav_1_2.html.ep
 
 
-    <%= nav justified, tabs => [
+    <%= nav justified, id => 'my-nav', tabs => [
                 ['Item 1', ['#'] ],
                 ['Item 2', ['#'], active ],
                 ['Item 3', ['#'] ],

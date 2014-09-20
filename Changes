@@ -1,5 +1,9 @@
 Revision history for Mojolicious-Plugin-BootstrapHelpers
 
+0.0174 2014-09-20T23:06:25Z CEST
+ [Enhancements]
+ - Improved navbar support (see examples)
+
 0.0173 2014-09-19T23:50:31Z CEST
  [Documentation]
  - Fixed some internal links.

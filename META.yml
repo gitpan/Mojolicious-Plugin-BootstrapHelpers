@@ -39,6 +39,6 @@ resources:
   bugtracker: https://github.com/Csson/p5-mojolicious-plugin-bootstraphelpers/issues
   homepage: https://github.com/Csson/p5-mojolicious-plugin-bootstraphelpers
   repository: https://github.com/Csson/p5-mojolicious-plugin-bootstraphelpers.git
-version: '0.0173'
+version: '0.0174'
 x_contributors:
   - 'Erik Carlsson <info@code301.com>'

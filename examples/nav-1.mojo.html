@@ -26,7 +26,7 @@
         &lt;li class=&quot;disabled&quot;&gt;&lt;a href=&quot;#&quot;&gt;Item 4&lt;/a&gt;&lt;/li&gt;
     &lt;/ul&gt;
 </pre><hr />    <ul class="nav nav-pills">        <li><a href="#">Item 1</a></li>        <li class="active"><a href="#">Item 2</a></li>        <li><a href="#">Item 3</a></li>        <li class="disabled"><a href="#">Item 4</a></li>    </ul></div></div><div class="panel panel-default"><div class="panel-body"><pre>
-    &lt;%= nav justified, tabs =&gt; [
+    &lt;%= nav justified, id =&gt; &#39;my-nav&#39;, tabs =&gt; [
                 [&#39;Item 1&#39;, [&#39;#&#39;] ],
                 [&#39;Item 2&#39;, [&#39;#&#39;], active ],
                 [&#39;Item 3&#39;, [&#39;#&#39;] ],
@@ -42,7 +42,7 @@
             ]
     %&gt;
 </pre><pre>
-    &lt;ul class=&quot;nav nav-justified nav-tabs&quot;&gt;
+    &lt;ul class=&quot;nav nav-justified nav-tabs&quot; id=&quot;my-nav&quot;&gt;
         &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Item 1&lt;/a&gt;&lt;/li&gt;
         &lt;li class=&quot;active&quot;&gt;&lt;a href=&quot;#&quot;&gt;Item 2&lt;/a&gt;&lt;/li&gt;
         &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Item 3&lt;/a&gt;&lt;/li&gt;
@@ -56,7 +56,7 @@
             &lt;/ul&gt;
         &lt;/li&gt;
     &lt;/ul&gt;
-</pre><hr />    <ul class="nav nav-justified nav-tabs">        <li><a href="#">Item 1</a></li>        <li class="active"><a href="#">Item 2</a></li>        <li><a href="#">Item 3</a></li>        <li class="dropdown">            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Dropdown <span class="caret"></span></a>            <ul class="dropdown-menu">                <li><a href="#">There are...</a></li>                <li><a href="#">...three...</a></li>                <li class="divider"></li>                <li><a href="#">...choices</a></li>            </ul>        </li>    </ul></div></div>
+</pre><hr />    <ul class="nav nav-justified nav-tabs" id="my-nav">        <li><a href="#">Item 1</a></li>        <li class="active"><a href="#">Item 2</a></li>        <li><a href="#">Item 3</a></li>        <li class="dropdown">            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Dropdown <span class="caret"></span></a>            <ul class="dropdown-menu">                <li><a href="#">There are...</a></li>                <li><a href="#">...three...</a></li>                <li class="divider"></li>                <li><a href="#">...choices</a></li>            </ul>        </li>    </ul></div></div>
         </div>
         <pre style="background-color: #fff; border-width: 0px;">
 
