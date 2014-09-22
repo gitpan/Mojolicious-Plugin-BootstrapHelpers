@@ -42,7 +42,7 @@ get '/dropdown_1_1' => 'dropdown_1_1';
 $test->get_ok('/dropdown_1_1')->status_is(200)->trimmed_content_is($expected_dropdown_1_1, 'Matched trimmed content in dropdown-1.mojo, line 1');
 
 
-#** test from dropdown-1.mojo, line 28
+#** test from dropdown-1.mojo, line 26
 
 my $expected_dropdown_1_2 = qq{
     <div class="dropdown">
@@ -62,7 +62,7 @@ my $expected_dropdown_1_2 = qq{
 
 get '/dropdown_1_2' => 'dropdown_1_2';
 
-$test->get_ok('/dropdown_1_2')->status_is(200)->trimmed_content_is($expected_dropdown_1_2, 'Matched trimmed content in dropdown-1.mojo, line 28');
+$test->get_ok('/dropdown_1_2')->status_is(200)->trimmed_content_is($expected_dropdown_1_2, 'Matched trimmed content in dropdown-1.mojo, line 26');
 
 done_testing();
 
@@ -72,22 +72,19 @@ __DATA__
 
 
     <%= dropdown
-         button => ['Dropdown 1', id => 'a_custom_id'],
-         right,
-         items => [
+         ['Dropdown 1', id => 'a_custom_id', right, items => [
             ['Item 1', ['item1'] ],
             ['Item 2', ['item2'] ],
             [],
             ['Item 3', ['item3'] ]
-         ] %>
+         ] ] %>
 
 
 @@ dropdown_1_2.html.ep
 
 
     <%= dropdown
-         button => ['Dropdown 2', caret, large, primary],
-         items => [
+         ['Dropdown 2', caret, large, primary, items => [
             ['Item 1', ['item1'], data => { attr => 2 } ],
             ['Item 2', ['item2'], disabled, data => { attr => 4 } ],
             [],
@@ -96,5 +93,5 @@ __DATA__
             ['Item 4', ['item4'], tabindex => 4 ],
             'This is a header',
             ['Item 5', ['item5'] ],
-         ] %>
+         ] ] %>
 

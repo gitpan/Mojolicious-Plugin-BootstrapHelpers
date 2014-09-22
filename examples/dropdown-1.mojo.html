@@ -12,14 +12,12 @@
         <div class="container">
             <div class="panel panel-default"><div class="panel-body"><pre>
     &lt;%= dropdown
-         button =&gt; [&#39;Dropdown 1&#39;, id =&gt; &#39;a_custom_id&#39;],
-         right,
-         items =&gt; [
+         [&#39;Dropdown 1&#39;, id =&gt; &#39;a_custom_id&#39;, right, items =&gt; [
             [&#39;Item 1&#39;, [&#39;item1&#39;] ],
             [&#39;Item 2&#39;, [&#39;item2&#39;] ],
             [],
             [&#39;Item 3&#39;, [&#39;item3&#39;] ]
-         ] %&gt;
+         ] ] %&gt;
 </pre><pre>
     &lt;div class=&quot;dropdown&quot;&gt;
         &lt;button class=&quot;btn btn-default dropdown-toggle&quot; type=&quot;button&quot; id=&quot;a_custom_id&quot; data-toggle=&quot;dropdown&quot;&gt;Dropdown 1&lt;/button&gt;
@@ -32,8 +30,7 @@
     &lt;/div&gt;
 </pre>By default, <code>tabindex</code> is set to <code>-1</code>...<hr />    <div class="dropdown">        <button class="btn btn-default dropdown-toggle" type="button" id="a_custom_id" data-toggle="dropdown">Dropdown 1</button>        <ul class="dropdown-menu dropdown-menu-right">            <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>            <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>            <li class="divider"></li>            <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>        </ul>    </div></div></div><div class="panel panel-default"><div class="panel-body"><pre>
     &lt;%= dropdown
-         button =&gt; [&#39;Dropdown 2&#39;, caret, large, primary],
-         items =&gt; [
+         [&#39;Dropdown 2&#39;, caret, large, primary, items =&gt; [
             [&#39;Item 1&#39;, [&#39;item1&#39;], data =&gt; { attr =&gt; 2 } ],
             [&#39;Item 2&#39;, [&#39;item2&#39;], disabled, data =&gt; { attr =&gt; 4 } ],
             [],
@@ -42,7 +39,7 @@
             [&#39;Item 4&#39;, [&#39;item4&#39;], tabindex =&gt; 4 ],
             &#39;This is a header&#39;,
             [&#39;Item 5&#39;, [&#39;item5&#39;] ],
-         ] %&gt;
+         ] ] %&gt;
 </pre><pre>
     &lt;div class=&quot;dropdown&quot;&gt;
         &lt;button class=&quot;btn btn-lg btn-primary dropdown-toggle&quot; type=&quot;button&quot; data-toggle=&quot;dropdown&quot;&gt;Dropdown 2 &lt;span class=&quot;caret&quot;&gt;&lt;/span&gt;&lt;/button&gt;

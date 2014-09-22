@@ -63,7 +63,7 @@ get '/button_group_1_2' => 'button_group_1_2';
 $test->get_ok('/button_group_1_2')->status_is(200)->trimmed_content_is($expected_button_group_1_2, 'Matched trimmed content in button_group-1.mojo, line 20');
 
 
-#** test from button_group-1.mojo, line 59
+#** test from button_group-1.mojo, line 57
 
 my $expected_button_group_1_3 = qq{
     <div class="btn-group-vertical">
@@ -85,10 +85,10 @@ my $expected_button_group_1_3 = qq{
 
 get '/button_group_1_3' => 'button_group_1_3';
 
-$test->get_ok('/button_group_1_3')->status_is(200)->trimmed_content_is($expected_button_group_1_3, 'Matched trimmed content in button_group-1.mojo, line 59');
+$test->get_ok('/button_group_1_3')->status_is(200)->trimmed_content_is($expected_button_group_1_3, 'Matched trimmed content in button_group-1.mojo, line 57');
 
 
-#** test from button_group-1.mojo, line 97
+#** test from button_group-1.mojo, line 93
 
 my $expected_button_group_1_4 = qq{
     <div class="btn-group btn-group-justified">
@@ -106,10 +106,10 @@ my $expected_button_group_1_4 = qq{
 
 get '/button_group_1_4' => 'button_group_1_4';
 
-$test->get_ok('/button_group_1_4')->status_is(200)->trimmed_content_is($expected_button_group_1_4, 'Matched trimmed content in button_group-1.mojo, line 97');
+$test->get_ok('/button_group_1_4')->status_is(200)->trimmed_content_is($expected_button_group_1_4, 'Matched trimmed content in button_group-1.mojo, line 93');
 
 
-#** test from button_group-1.mojo, line 122
+#** test from button_group-1.mojo, line 118
 
 my $expected_button_group_1_5 = qq{
     <div class="btn-group btn-group-justified">
@@ -130,10 +130,10 @@ my $expected_button_group_1_5 = qq{
 
 get '/button_group_1_5' => 'button_group_1_5';
 
-$test->get_ok('/button_group_1_5')->status_is(200)->trimmed_content_is($expected_button_group_1_5, 'Matched trimmed content in button_group-1.mojo, line 122');
+$test->get_ok('/button_group_1_5')->status_is(200)->trimmed_content_is($expected_button_group_1_5, 'Matched trimmed content in button_group-1.mojo, line 118');
 
 
-#** test from button_group-1.mojo, line 159
+#** test from button_group-1.mojo, line 152
 
 my $expected_button_group_1_6 = qq{
     <div class="btn-group">
@@ -153,10 +153,10 @@ my $expected_button_group_1_6 = qq{
 
 get '/button_group_1_6' => 'button_group_1_6';
 
-$test->get_ok('/button_group_1_6')->status_is(200)->trimmed_content_is($expected_button_group_1_6, 'Matched trimmed content in button_group-1.mojo, line 159');
+$test->get_ok('/button_group_1_6')->status_is(200)->trimmed_content_is($expected_button_group_1_6, 'Matched trimmed content in button_group-1.mojo, line 152');
 
 
-#** test from button_group-1.mojo, line 193
+#** test from button_group-1.mojo, line 184
 
 my $expected_button_group_1_7 = qq{
     <div class="btn-group">
@@ -184,7 +184,7 @@ my $expected_button_group_1_7 = qq{
 
 get '/button_group_1_7' => 'button_group_1_7';
 
-$test->get_ok('/button_group_1_7')->status_is(200)->trimmed_content_is($expected_button_group_1_7, 'Matched trimmed content in button_group-1.mojo, line 193');
+$test->get_ok('/button_group_1_7')->status_is(200)->trimmed_content_is($expected_button_group_1_7, 'Matched trimmed content in button_group-1.mojo, line 184');
 
 done_testing();
 
@@ -208,14 +208,12 @@ __DATA__
     <%= buttongroup small,
         buttons => [
             ['Button 1'],
-            { button => ['Dropdown 1', caret],
-              items => [
-                  ['Item 1', ['item1'] ],
-                  ['Item 2', ['item2'] ],
-                  [],
-                  ['Item 3', ['item3'] ],
-              ],
-            },
+            ['Dropdown 1', caret, items => [
+                ['Item 1', ['item1'] ],
+                ['Item 2', ['item2'] ],
+                [],
+                ['Item 3', ['item3'] ],
+            ] ],
             ['Button 2'],
             ['Button 3'],
         ],
@@ -228,14 +226,12 @@ __DATA__
     <%= buttongroup vertical,
         buttons => [
             ['Button 1'],
-            { button => ['Dropdown 1', caret],
-              items => [
+            ['Dropdown 1', caret, items => [
                   ['Item 1', ['item1'] ],
                   ['Item 2', ['item2'] ],
                   [],
                   ['Item 3', ['item3'] ],
-              ],
-            },
+            ] ],
             ['Button 2'],
             ['Button 3'],
         ],
@@ -261,15 +257,12 @@ __DATA__
         buttons => [
             ['Link 1', ['http://www.example.com/'] ],
             ['Link 2', ['http://www.example.com/'] ],
-            { dropup,
-              button => ['Dropup 1', caret],
-              items => [
-                  ['Item 1', ['item1'] ],
-                  ['Item 2', ['item2'] ],
-                  [],
-                  ['Item 3', ['item3'] ],
-              ],
-            },
+            ['Dropup 1', caret, dropup, items => [
+                ['Item 1', ['item1'] ],
+                ['Item 2', ['item2'] ],
+                [],
+                ['Item 3', ['item3'] ],
+            ] ],
         ]
     %>
 
@@ -280,14 +273,12 @@ __DATA__
     <%= buttongroup
         buttons => [
             ['Link 1', ['http://www.example.com/'] ],
-            { button => [undef, caret],
-              items => [
-                  ['Item 1', ['item1'] ],
-                  ['Item 2', ['item2'] ],
-                  [],
-                  ['Item 3', ['item3'] ],
-              ],
-            },
+            [undef, caret, items => [
+                ['Item 1', ['item1'] ],
+                ['Item 2', ['item2'] ],
+                [],
+                ['Item 3', ['item3'] ],
+            ] ],
         ]
     %>
 
@@ -295,23 +286,19 @@ __DATA__
 @@ button_group_1_7.html.ep
 
 
-    <%= buttongroup { button => ['Default', caret],
-                      items  => [
-                          ['Item 1', ['item1'] ],
-                          ['Item 2', ['item2'] ],
-                          [],
-                          ['Item 3', ['item3'] ],
-                      ],
-                    }
+    <%= buttongroup ['Default', caret, items  => [
+                        ['Item 1', ['item1'] ],
+                        ['Item 2', ['item2'] ],
+                        [],
+                        ['Item 3', ['item3'] ],
+                    ] ]
     %>
 
-    <%= buttongroup { button => ['Big danger', caret, large, danger],
-                      items  => [
+    <%= buttongroup ['Big danger', caret, large, danger, items => [
                           ['Item 1', ['item1'] ],
                           ['Item 2', ['item2'] ],
                           [],
                           ['Item 3', ['item3'] ],
-                      ],
-                    }
+                    ] ]
     %>
 

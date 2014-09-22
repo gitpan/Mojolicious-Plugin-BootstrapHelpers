@@ -28,14 +28,12 @@
     &lt;%= buttongroup small,
         buttons =&gt; [
             [&#39;Button 1&#39;],
-            { button =&gt; [&#39;Dropdown 1&#39;, caret],
-              items =&gt; [
-                  [&#39;Item 1&#39;, [&#39;item1&#39;] ],
-                  [&#39;Item 2&#39;, [&#39;item2&#39;] ],
-                  [],
-                  [&#39;Item 3&#39;, [&#39;item3&#39;] ],
-              ],
-            },
+            [&#39;Dropdown 1&#39;, caret, items =&gt; [
+                [&#39;Item 1&#39;, [&#39;item1&#39;] ],
+                [&#39;Item 2&#39;, [&#39;item2&#39;] ],
+                [],
+                [&#39;Item 3&#39;, [&#39;item3&#39;] ],
+            ] ],
             [&#39;Button 2&#39;],
             [&#39;Button 3&#39;],
         ],
@@ -60,14 +58,12 @@
     &lt;%= buttongroup vertical,
         buttons =&gt; [
             [&#39;Button 1&#39;],
-            { button =&gt; [&#39;Dropdown 1&#39;, caret],
-              items =&gt; [
+            [&#39;Dropdown 1&#39;, caret, items =&gt; [
                   [&#39;Item 1&#39;, [&#39;item1&#39;] ],
                   [&#39;Item 2&#39;, [&#39;item2&#39;] ],
                   [],
                   [&#39;Item 3&#39;, [&#39;item3&#39;] ],
-              ],
-            },
+            ] ],
             [&#39;Button 2&#39;],
             [&#39;Button 3&#39;],
         ],
@@ -113,15 +109,12 @@
         buttons =&gt; [
             [&#39;Link 1&#39;, [&#39;http://www.example.com/&#39;] ],
             [&#39;Link 2&#39;, [&#39;http://www.example.com/&#39;] ],
-            { dropup,
-              button =&gt; [&#39;Dropup 1&#39;, caret],
-              items =&gt; [
-                  [&#39;Item 1&#39;, [&#39;item1&#39;] ],
-                  [&#39;Item 2&#39;, [&#39;item2&#39;] ],
-                  [],
-                  [&#39;Item 3&#39;, [&#39;item3&#39;] ],
-              ],
-            },
+            [&#39;Dropup 1&#39;, caret, dropup, items =&gt; [
+                [&#39;Item 1&#39;, [&#39;item1&#39;] ],
+                [&#39;Item 2&#39;, [&#39;item2&#39;] ],
+                [],
+                [&#39;Item 3&#39;, [&#39;item3&#39;] ],
+            ] ],
         ]
     %&gt;
 </pre><pre>
@@ -143,14 +136,12 @@
     &lt;%= buttongroup
         buttons =&gt; [
             [&#39;Link 1&#39;, [&#39;http://www.example.com/&#39;] ],
-            { button =&gt; [undef, caret],
-              items =&gt; [
-                  [&#39;Item 1&#39;, [&#39;item1&#39;] ],
-                  [&#39;Item 2&#39;, [&#39;item2&#39;] ],
-                  [],
-                  [&#39;Item 3&#39;, [&#39;item3&#39;] ],
-              ],
-            },
+            [undef, caret, items =&gt; [
+                [&#39;Item 1&#39;, [&#39;item1&#39;] ],
+                [&#39;Item 2&#39;, [&#39;item2&#39;] ],
+                [],
+                [&#39;Item 3&#39;, [&#39;item3&#39;] ],
+            ] ],
         ]
     %&gt;
 </pre><pre>
@@ -168,24 +159,20 @@
         &lt;/div&gt;
     &lt;/div&gt;
 </pre>Split button dropdowns uses the same syntax as any other multi-button dropdown. Set the <code>caret</code> button title to <code>undef</code>.<hr />    <div class="btn-group">        <a class="btn btn-default" href="http://www.example.com/">Link 1</a>        <div class="btn-group">            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown"><span class="caret"></span>            </button>            <ul class="dropdown-menu">                <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>                <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>                <li class="divider"></li>                <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>            </ul>        </div>    </div></div></div><div class="panel panel-default"><div class="panel-body"><pre>
-    &lt;%= buttongroup { button =&gt; [&#39;Default&#39;, caret],
-                      items  =&gt; [
-                          [&#39;Item 1&#39;, [&#39;item1&#39;] ],
-                          [&#39;Item 2&#39;, [&#39;item2&#39;] ],
-                          [],
-                          [&#39;Item 3&#39;, [&#39;item3&#39;] ],
-                      ],
-                    }
+    &lt;%= buttongroup [&#39;Default&#39;, caret, items  =&gt; [
+                        [&#39;Item 1&#39;, [&#39;item1&#39;] ],
+                        [&#39;Item 2&#39;, [&#39;item2&#39;] ],
+                        [],
+                        [&#39;Item 3&#39;, [&#39;item3&#39;] ],
+                    ] ]
     %&gt;
 
-    &lt;%= buttongroup { button =&gt; [&#39;Big danger&#39;, caret, large, danger],
-                      items  =&gt; [
+    &lt;%= buttongroup [&#39;Big danger&#39;, caret, large, danger, items =&gt; [
                           [&#39;Item 1&#39;, [&#39;item1&#39;] ],
                           [&#39;Item 2&#39;, [&#39;item2&#39;] ],
                           [],
                           [&#39;Item 3&#39;, [&#39;item3&#39;] ],
-                      ],
-                    }
+                    ] ]
     %&gt;
 </pre><pre>
     &lt;div class=&quot;btn-group&quot;&gt;

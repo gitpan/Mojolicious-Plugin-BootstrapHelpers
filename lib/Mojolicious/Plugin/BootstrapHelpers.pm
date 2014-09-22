@@ -1,4 +1,4 @@
-package Mojolicious::Plugin::BootstrapHelpers 0.0175 {
+package Mojolicious::Plugin::BootstrapHelpers 0.0176 {
 
     use strict;
     use warnings;
@@ -476,14 +476,12 @@ A basic button group.
     <%= buttongroup small,
         buttons => [
             ['Button 1'],
-            { button => ['Dropdown 1', caret],
-              items => [
-                  ['Item 1', ['item1'] ],
-                  ['Item 2', ['item2'] ],
-                  [],
-                  ['Item 3', ['item3'] ],
-              ],
-            },
+            ['Dropdown 1', caret, items => [
+                ['Item 1', ['item1'] ],
+                ['Item 2', ['item2'] ],
+                [],
+                ['Item 3', ['item3'] ],
+            ] ],
             ['Button 2'],
             ['Button 3'],
         ],
@@ -518,14 +516,12 @@ Nested button group. Note that the <code>small</code> strapping is only necessar
     <%= buttongroup vertical,
         buttons => [
             ['Button 1'],
-            { button => ['Dropdown 1', caret],
-              items => [
+            ['Dropdown 1', caret, items => [
                   ['Item 1', ['item1'] ],
                   ['Item 2', ['item2'] ],
                   [],
                   ['Item 3', ['item3'] ],
-              ],
-            },
+            ] ],
             ['Button 2'],
             ['Button 3'],
         ],
@@ -561,15 +557,12 @@ Nested button group, with the <code>vertical</code> strapping.
         buttons => [
             ['Link 1', ['http://www.example.com/'] ],
             ['Link 2', ['http://www.example.com/'] ],
-            { dropup,
-              button => ['Dropup 1', caret],
-              items => [
-                  ['Item 1', ['item1'] ],
-                  ['Item 2', ['item2'] ],
-                  [],
-                  ['Item 3', ['item3'] ],
-              ],
-            },
+            ['Dropup 1', caret, dropup, items => [
+                ['Item 1', ['item1'] ],
+                ['Item 2', ['item2'] ],
+                [],
+                ['Item 3', ['item3'] ],
+            ] ],
         ]
     %>
 
@@ -601,14 +594,12 @@ Mix links and <code>dropup</code> menus in <code>justified</code> button groups.
     <%= buttongroup
         buttons => [
             ['Link 1', ['http://www.example.com/'] ],
-            { button => [undef, caret],
-              items => [
-                  ['Item 1', ['item1'] ],
-                  ['Item 2', ['item2'] ],
-                  [],
-                  ['Item 3', ['item3'] ],
-              ],
-            },
+            [undef, caret, items => [
+                ['Item 1', ['item1'] ],
+                ['Item 2', ['item2'] ],
+                [],
+                ['Item 3', ['item3'] ],
+            ] ],
         ]
     %>
 
@@ -636,24 +627,20 @@ Split button dropdowns uses the same syntax as any other multi-button dropdown. 
 =end html
 
 
-    <%= buttongroup { button => ['Default', caret],
-                      items  => [
-                          ['Item 1', ['item1'] ],
-                          ['Item 2', ['item2'] ],
-                          [],
-                          ['Item 3', ['item3'] ],
-                      ],
-                    }
+    <%= buttongroup ['Default', caret, items  => [
+                        ['Item 1', ['item1'] ],
+                        ['Item 2', ['item2'] ],
+                        [],
+                        ['Item 3', ['item3'] ],
+                    ] ]
     %>
 
-    <%= buttongroup { button => ['Big danger', caret, large, danger],
-                      items  => [
+    <%= buttongroup ['Big danger', caret, large, danger, items => [
                           ['Item 1', ['item1'] ],
                           ['Item 2', ['item2'] ],
                           [],
                           ['Item 3', ['item3'] ],
-                      ],
-                    }
+                    ] ]
     %>
 
     <div class="btn-group">
@@ -799,14 +786,12 @@ C<caret> adds a C<E<lt>span class="caret"E<gt>E<lt>/span<E<gt>> element on the b
 
 
     <%= dropdown
-         button => ['Dropdown 1', id => 'a_custom_id'],
-         right,
-         items => [
+         ['Dropdown 1', id => 'a_custom_id', right, items => [
             ['Item 1', ['item1'] ],
             ['Item 2', ['item2'] ],
             [],
             ['Item 3', ['item3'] ]
-         ] %>
+         ] ] %>
 
     <div class="dropdown">
         <button class="btn btn-default dropdown-toggle" type="button" id="a_custom_id" data-toggle="dropdown">Dropdown 1</button>
@@ -829,8 +814,7 @@ By default, <code>tabindex</code> is set to <code>-1</code>...
 
 
     <%= dropdown
-         button => ['Dropdown 2', caret, large, primary],
-         items => [
+         ['Dropdown 2', caret, large, primary, items => [
             ['Item 1', ['item1'], data => { attr => 2 } ],
             ['Item 2', ['item2'], disabled, data => { attr => 4 } ],
             [],
@@ -839,7 +823,7 @@ By default, <code>tabindex</code> is set to <code>-1</code>...
             ['Item 4', ['item4'], tabindex => 4 ],
             'This is a header',
             ['Item 5', ['item5'] ],
-         ] %>
+         ] ] %>
 
     <div class="dropdown">
         <button class="btn btn-lg btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Dropdown 2 <span class="caret"></span></button>
@@ -1105,25 +1089,6 @@ Creates a multi button buttongroup. See L<button_groups|/"Button-groups"> for de
 =head3 Examples
 
 
-    <%= input input => { text_field => ['username'] },
-              prepend => { check_box => ['agreed'] }
-    %>
-
-    <div class="input-group">
-        <span class="input-group-addon"><input name="agreed" type="checkbox" /></span>
-        <input class="form-control" id="username" type="text" name="username" />
-    </div>
-
-=begin html
-
-<p>
-An input group with a checkbox.
-
-</p>
-
-=end html
-
-
     <%= input large,
               prepend => { radio_button => ['yes'] },
               input => { text_field => ['username'] },
@@ -1141,106 +1106,6 @@ An input group with a checkbox.
 <p>
 A <code>large</code> input group with a radio button prepended and a string appended.
 
-</p>
-
-=end html
-
-
-    <%= input input => { text_field => ['username'] },
-              append => { button => ['Click me!'] },
-    %>
-
-    <div class="input-group">
-        <input class="form-control" id="username" type="text" name="username" />
-        <span class="input-group-btn"><button class="btn btn-default" type="button">Click me!</button></span>
-    </div>
-
-=begin html
-
-<p>
-An input group with a button.
-
-</p>
-
-=end html
-
-
-    <%= input input  => { text_field => ['username'] },
-              append => { buttongroup => {
-                              right,
-                              button => ['The button', caret],
-                              items  => [
-                                  ['Item 1', ['item1'] ],
-                                  ['Item 2', ['item2'] ],
-                                  [],
-                                  ['Item 3', ['item3'] ],
-                              ],
-                          }
-                        }
-    %>
-
-    <div class="input-group">
-        <input class="form-control" id="username" type="text" name="username" />
-        <div class="input-group-btn">
-            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">The button <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-right">
-                <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
-                <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
-                <li class="divider"></li>
-                <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>
-            </ul>
-        </div>
-    </div>
-
-=begin html
-
-<p>
-An input group with a button dropdown appended. Note that <code>right</code> is manually applied.
-
-</p>
-
-=end html
-
-
-    <%= input input   => { text_field => ['username'] },
-              prepend => { buttongroup => [
-                              buttons => [
-                                ['Link 1', ['http://www.example.com/'] ],
-                                { button => [undef, caret],
-                                  items => [
-                                      ['Item 1', ['item1'] ],
-                                      ['Item 2', ['item2'] ],
-                                      [],
-                                      ['Item 3', ['item3'] ],
-                                  ],
-                               },
-                            ],
-                         ],
-                      },
-    %>
-
-    <div class="input-group">
-        <div class="input-group-btn">
-            <a class="btn btn-default" href="http://www.example.com/">Link 1</a>
-            <div class="btn-group">
-                <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown"><span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="menuitem" href="item1" tabindex="-1">Item 1</a></li>
-                    <li><a class="menuitem" href="item2" tabindex="-1">Item 2</a></li>
-                    <li class="divider"></li>
-                    <li><a class="menuitem" href="item3" tabindex="-1">Item 3</a></li>
-                </ul>
-            </div>
-        </div>
-        <input class="form-control" id="username" type="text" name="username" />
-    </div>
-
-=begin html
-
-<p>
-An input group with a split button dropdown prepended.
 </p>
 
 =end html
