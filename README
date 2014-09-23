@@ -190,16 +190,14 @@ DESCRIPTION
 
         $linktext, [ $url ], %link_has
 
-        $itemtext
+    $itemtext
 
-        Mandatory. The text on the link.
+    Mandatory. The text on the link.
 
-        $url
+    $url
 
-        Mandatory. It sets the "href" on the link. url_for is used to create
-        the link.
-
-    It is similar to a button, except that $url is mandatory
+    Mandatory. It sets the "href" on the link. url_for is used to create the
+    link.
 
 HELPERS
     Bootstrap documentation <http://getbootstrap.com/components/#badges>
@@ -946,7 +944,7 @@ HELPERS
                       nav => [ |nav| ]
                       p => [ $text, %p_has ]
 
-    "Navbars" are comples structures. They take the following arguments:
+    "Navbars" are complex structures. They take the following arguments:
 
     "header => [ |link|, %navbar_has ]"
 
@@ -999,9 +997,13 @@ HELPERS
             Mandatory array reference. The second argument to "form" can
             take different types (any number of times, rendered in order):
 
-                "formgroup => [ |formgroup| ]" "input => [ |input| ]"
-                "button => [ |button| ]" "submit_button => [ |submit_button|
-                ]"
+                "formgroup => [ |formgroup| ]"
+
+                "input => [ |input| ]"
+
+                "button => [ |button| ]"
+
+                "submit_button => [ |submit_button| ]"
 
                 Creates form groups, input groups, buttons and
                 submit_buttons

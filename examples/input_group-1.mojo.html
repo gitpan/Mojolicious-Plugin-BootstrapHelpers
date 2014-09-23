@@ -40,7 +40,7 @@
         &lt;input class=&quot;form-control&quot; id=&quot;username&quot; type=&quot;text&quot; name=&quot;username&quot; /&gt;
         &lt;span class=&quot;input-group-btn&quot;&gt;&lt;button class=&quot;btn btn-default&quot; type=&quot;button&quot;&gt;Click me!&lt;/button&gt;&lt;/span&gt;
     &lt;/div&gt;
-</pre>An input group with a button.<hr />    <div class="input-group">        <input class="form-control" id="username" type="text" name="username" />        <span class="input-group-btn"><button class="btn btn-default" type="button">Click me!</button></span>    </div></div></div><div class="panel panel-default"><div class="panel-body">    <%= buttongroup ['Default', caret, items  => [                        ['Item 1', ['item1'] ],                        ['Item 2', ['item2'] ],                        [],                        ['Item 3', ['item3'] ],                    ] ]    %><pre>
+</pre>An input group with a button.<hr />    <div class="input-group">        <input class="form-control" id="username" type="text" name="username" />        <span class="input-group-btn"><button class="btn btn-default" type="button">Click me!</button></span>    </div></div></div><div class="panel panel-default"><div class="panel-body"><pre>
     &lt;%= input input  =&gt; { text_field =&gt; [&#39;username&#39;] },
               append =&gt; { buttongroup =&gt; [[&#39;The button&#39;, caret, right, items =&gt; [
                                   [&#39;Item 1&#39;, [&#39;item1&#39;] ],

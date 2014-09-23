@@ -1,4 +1,4 @@
-package Mojolicious::Plugin::BootstrapHelpers::Helpers 0.0180 {
+package Mojolicious::Plugin::BootstrapHelpers::Helpers 0.0181 {
 
     use strict;
     use warnings;

@@ -1,4 +1,4 @@
-package Mojolicious::Plugin::BootstrapHelpers 0.0180 {
+package Mojolicious::Plugin::BootstrapHelpers 0.0181 {
 
     use strict;
     use warnings;
@@ -267,8 +267,6 @@ All other C<|references|> are also helpers, so C<|link|> needs special mention:
 
     $linktext, [ $url ], %link_has
 
-=over 4
-
 B<C<$itemtext>>
 
 Mandatory. The text on the link.
@@ -277,9 +275,6 @@ B<C<$url>>
 
 Mandatory. It sets the C<href> on the link. L<url_for|Mojolicious::Controller#url_for> is used to create the link.
 
-=back
-
-It is similar to a L<button|/"Buttons">, except that C<$url> is mandatory
 
 
 =head1 HELPERS
@@ -1155,21 +1150,6 @@ An input group with a button.
 =end html
 
 
-
-=begin html
-
-<p>
-    <%= buttongroup ['Default', caret, items  => [
-                        ['Item 1', ['item1'] ],
-                        ['Item 2', ['item2'] ],
-                        [],
-                        ['Item 3', ['item3'] ],
-                    ] ]
-    %>
-</p>
-
-=end html
-
     <%= input input  => { text_field => ['username'] },
               append => { buttongroup => [['The button', caret, right, items => [
                                   ['Item 1', ['item1'] ],
@@ -1362,7 +1342,7 @@ A tab navigation with a menu.
                   nav => [ |nav| ]
                   p => [ $text, %p_has ]
 
-C<Navbars> are comples structures. They take the following arguments:
+C<Navbars> are complex structures. They take the following arguments:
 
 B<C<header =E<gt> [ |link|, %navbar_has ]>>
 
@@ -1423,8 +1403,11 @@ Mandatory array reference. The second argument to C<form> can take different typ
 =over 4
 
 B<C<formgroup =E<gt> [ |formgroup| ]>>
+
 B<C<input =E<gt> [ |input| ]>>
+
 B<C<button =E<gt> [ |button| ]>>
+
 B<C<submit_button =E<gt> [ |submit_button| ]>>
 
 Creates L<form groups|/"Form-groups">, L<input groups|/"Input-groups">, L<buttons|/"Buttons"> and L<submit_buttons|/"Submit_buttons">
@@ -1580,7 +1563,7 @@ A simple navbar with a couple of links and a submenu.
 =begin html
 
 <p>
-This is (almost) identical to the <a href="http://getbootstrap.com/components/#navbar">Bootstrap documentation example</a>.
+This is (almost) identical to the <a href="http://getbootstrap.com/components/#navbar">Bootstrap documentation example</a>. The differences should be: The <code>form</code> has an action, the <code>input</code> has <code>id</code> and <code>name</code>.
 </p>
 
 =end html

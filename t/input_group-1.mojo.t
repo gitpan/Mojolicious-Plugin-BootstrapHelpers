@@ -89,7 +89,7 @@ get '/input_group_1_4' => 'input_group_1_4';
 $test->get_ok('/input_group_1_4')->status_is(200)->trimmed_content_is($expected_input_group_1_4, 'Matched trimmed content in input_group-1.mojo, line 49');
 
 
-#** test from input_group-1.mojo, line 86
+#** test from input_group-1.mojo, line 79
 
 my $expected_input_group_1_5 = qq{
     <div class="input-group">
@@ -112,7 +112,7 @@ my $expected_input_group_1_5 = qq{
 
 get '/input_group_1_5' => 'input_group_1_5';
 
-$test->get_ok('/input_group_1_5')->status_is(200)->trimmed_content_is($expected_input_group_1_5, 'Matched trimmed content in input_group-1.mojo, line 86');
+$test->get_ok('/input_group_1_5')->status_is(200)->trimmed_content_is($expected_input_group_1_5, 'Matched trimmed content in input_group-1.mojo, line 79');
 
 done_testing();
 
