@@ -937,7 +937,7 @@ HELPERS
 
   Navbars
    Syntax
-        navbar %has, header => [ |link|, %navbar_has ],
+        navbar (inverse,) header => [ |link|, %navbar_has ],
                      form => [
                          [ [ $url ], %form_has ],
                          [
@@ -952,6 +952,11 @@ HELPERS
                       p => [ $text, %p_has ]
 
     "Navbars" are complex structures. They take the following arguments:
+
+    "inverse"
+
+    The "inverse" strapping is currently outside the %navbar_has. It applies
+    the ".navbar-inverse" class.
 
     "header => [ |link|, %navbar_has ]"
 
@@ -1015,6 +1020,7 @@ HELPERS
                 Creates form groups, input groups, buttons and
                 submit_buttons
 
+   Examples
         <%= navbar header => ['The brand', ['#'], hamburger, toggler => 'bs-example-navbar-collapse-2'],
                    nav => [ items => [
                            ['Link', ['#'] ],

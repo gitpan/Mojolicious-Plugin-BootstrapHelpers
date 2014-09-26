@@ -1,4 +1,4 @@
-package Mojolicious::Plugin::BootstrapHelpers 0.0183 {
+package Mojolicious::Plugin::BootstrapHelpers 0.0184 {
 
     use strict;
     use warnings;
@@ -1338,7 +1338,7 @@ A tab navigation with a menu.
 
 =head3 Syntax
 
-    navbar %has, header => [ |link|, %navbar_has ],
+    navbar (inverse,) header => [ |link|, %navbar_has ],
                  form => [
                      [ [ $url ], %form_has ],
                      [
@@ -1353,6 +1353,10 @@ A tab navigation with a menu.
                   p => [ $text, %p_has ]
 
 C<Navbars> are complex structures. They take the following arguments:
+
+B<C<inverse>>
+
+The C<inverse> strapping is currently outside the C<%navbar_has>. It applies the C<.navbar-inverse> class.
 
 B<C<header =E<gt> [ |link|, %navbar_has ]>>
 
@@ -1427,6 +1431,8 @@ Creates L<form groups|/"Form-groups">, L<input groups|/"Input-groups">, L<button
 =back
 
 =back
+
+=head3 Examples
 
 
     <%= navbar header => ['The brand', ['#'], hamburger, toggler => 'bs-example-navbar-collapse-2'],
