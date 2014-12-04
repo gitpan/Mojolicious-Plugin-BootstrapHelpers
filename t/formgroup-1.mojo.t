@@ -139,6 +139,20 @@ get '/formgroup_1_8' => 'formgroup_1_8';
 
 $test->get_ok('/formgroup_1_8')->status_is(200)->trimmed_content_is($expected_formgroup_1_8, 'Matched trimmed content in formgroup-1.mojo, line 106');
 
+
+#** test from formgroup-1.mojo, line 116
+
+my $expected_formgroup_1_9 = qq{
+    <div class="form-group">
+        <label class="control-label" for="atextarea">Text test 9</label>
+        <textarea class="form-control" id="atextarea" name="atextarea">default text</textarea>
+    </div>
+};
+
+get '/formgroup_1_9' => 'formgroup_1_9';
+
+$test->get_ok('/formgroup_1_9')->status_is(200)->trimmed_content_is($expected_formgroup_1_9, 'Matched trimmed content in formgroup-1.mojo, line 116');
+
 done_testing();
 
 __DATA__
@@ -193,4 +207,10 @@ __DATA__
 
 
     %= formgroup text_field => ['test-text-9']
+
+
+@@ formgroup_1_9.html.ep
+
+
+    %= formgroup 'Text test 9', text_area => ['atextarea', 'default text']
 
